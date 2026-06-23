@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>30秒 外国人採用 適性診断｜ヒトキワ</title>
+<meta name="description" content="人手不足の外国人採用、何から始める？30秒の診断で、御社に合った採用ルート（特定技能／技人国／カテゴリー対策）と、紹介できる人材イメージがわかります。ヒトキワが採用から定着まで伴走します。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Shippori+Mincho+B1:wght@600;800&display=swap" rel="stylesheet">
+<!-- ============================================================================
+     ヒトキワ様 リード獲得用「外国人採用 適性診断フォーム」 初稿
+     2026/06 営業施策MTG（中山様・兼松様）のご要望を反映して作成。
+
+     ＜MTGで伺ったポイント＞
+     ・「無料で紹介できます」フックからの転換 → 「外国人雇用ならヒトキワに全面相談」
+       ＝採用から定着まで“伴走する会社”という打ち出し（中山様）
+     ・診断で「特定技能 / 技人国」を出し分け、企業カテゴリー(②化)にも触れる（兼松様）
+     ・結果で「こういう人材が紹介できます」＝求職者プロフィール／分布を見せて
+       問い合わせへつなげる（兼松様）
+     ・回答はGoogleフォーム的にスプレッドシートへ自動保存＋営業へメール通知。
+       入口別にシートを分けてA/B比較できるように（対馬）
+
+     ＜運用設定＞ 下の CONFIG.GAS_URL に Google Apps Script のWebアプリURLを貼ると、
+     回答が自動でスプレッドシートに保存され、営業にメール通知されます（手順は別途共有）。
+     未設定でもデモとして単体で動作します。
+============================================================================ -->
+<style>
+  /* ===== カラートーン：和モダン（日本の伝統色＝和色）×ヒトキワ・ブランド =====
+     生成り（washi）の地に、苔色（こけいろ）＝ヒトキワ・グリーンを主役に。
+     藍色（あいいろ）を準主役、弁柄（べんがら＝朱）を差し色、金茶（きんちゃ）を注意喚起に。 */
+  /* ===== カラートーン：広告バナー準拠（ヒトキワ・グリーン＋イエローのアクセント） ===== */
+  :root{
+    --ink:#1d2a20;        /* ほぼ黒（わずかに緑みの墨） */
+    --muted:#5b6a5f;      /* グレイッシュグリーン */
+    --soft:#94a097;       /* 淡いグレーグリーン */
+    --accent:#2f9e44;     /* ヒトキワ・グリーン（バナーの緑＝主役） */
+    --accent-deep:#1c7a36;/* 深緑（大見出し・濃い緑） */
+    --indigo:#2a6e8c;     /* 補助の青（技人国ルート） */
+    --indigo-deep:#1f5469;
+    --vermilion:#1c7a36;  /* 差し色＝深緑（見出しキッカー等） */
+    --vermilion-soft:#e3f1e6;
+    --amber:#d99a12;      /* イエロー／ゴールド（バナーの黄＝アクセント） */
+    --amber-soft:#fdf3d2; /* 淡いイエロー（ハイライトのピル） */
+    --teal:#2f9e44;       /* 緑（おすすめ＝特定技能ルート） */
+    --teal-soft:#e4f3e7;
+    --red:#c0492f; --red-soft:#fbe9e2;  /* 危険・エラー／相談ルート用 */
+    --paper:#f4f8f2;      /* ほぼ白の淡いグリーン地（バナーの清潔感） */
+    --card:#ffffff;       /* 白カード */
+    --line:#e1e8e0; --line2:#eef3ec;
+    --blue-soft:#e7f0f4;  /* うすい青 */
+    --sans:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic","Meiryo",sans-serif;
+    --serif:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.92;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    letter-spacing:.04em; font-feature-settings:"palt" 1;  /* 和文の詰め＝読みやすく上品に */
+    /* 生成りの地に、ごく淡い麻の葉文様（和テイスト） */
+    background-color:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104' viewBox='0 0 60 104'%3E%3Cg fill='none' stroke='%232f9e44' stroke-width='0.6' stroke-opacity='0.05'%3E%3Cpath d='M30 0L60 17.3v34.7L30 69.3 0 52V17.3z'/%3E%3Cpath d='M30 0v34.7M0 17.3l30 17.3 30-17.3M0 52l30-17.3L60 52'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  ::selection{background:rgba(47,158,68,.16);}
+  h1,h2,h3,.rtitle,.diag h2{font-feature-settings:"palt" 1;}
+
+  .bar{background:var(--ink); color:#fff; padding:13px 22px; display:flex; align-items:center; gap:12px;
+    /* ごく淡い青海波（せいがいは）文様 */
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.05' stroke-width='1'%3E%3Cpath d='M0 20a20 20 0 0140 0M-20 20a20 20 0 0140 0M20 20a20 20 0 0140 0'/%3E%3C/g%3E%3C/svg%3E");}
+  .bar .hk-logo{height:24px; width:auto; display:block; color:#fff;}
+  .bar .tagline{font-size:12px; color:#c9cfc4; letter-spacing:.06em; margin-left:auto;}
+  @media (max-width:560px){ .bar .tagline{display:none;} }
+  .hk-logo{display:inline-block; vertical-align:middle;}
+  .wrap{max-width:760px; margin:0 auto; padding:0 20px 80px;}
+
+  .hero{padding:50px 0 8px; text-align:center;}
+  /* バナーに合わせた緑のピル型バッジ */
+  .hero .kick{display:inline-block; font-size:13px; font-weight:700; letter-spacing:.06em; color:#fff; background:var(--accent-deep); padding:9px 22px; border-radius:999px; margin-bottom:22px; box-shadow:0 4px 14px rgba(28,122,54,.22);}
+  /* 見出し＝明朝で大きく強く（メリハリの“強”） */
+  .hero h1{font-family:var(--serif); font-weight:800; font-size:41px; line-height:1.42; letter-spacing:.01em; margin:0 0 18px;}
+  .hero h1 .em{color:var(--accent); position:relative; white-space:nowrap;}
+  .hero h1 .em::after{content:""; position:absolute; left:0; right:0; bottom:.06em; height:.34em; background:var(--accent); opacity:.13; border-radius:2px; z-index:-1;}
+  /* 本文＝細めゴシックで静かに（メリハリの“弱”） */
+  .hero p{color:var(--muted); font-size:15px; font-weight:500; line-height:1.95; margin:0 auto 8px; max-width:560px;}
+  /* キャッチの“強”：太ゴシックで一気に主張 */
+  .hero .punch{color:var(--ink); font-size:20px; font-weight:800; line-height:1.7; letter-spacing:.02em; margin-top:18px;}
+  .hero .punch b{font-family:var(--sans); font-weight:900; font-size:1.18em; color:var(--accent);}
+  .hero .punch .sub{display:block; font-size:14px; font-weight:500; color:var(--muted); margin-top:4px;}
+
+  .trust{display:flex; flex-wrap:wrap; justify-content:center; gap:8px 10px; margin:22px auto 0; max-width:600px;}
+  .trust .chip{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--accent-deep); background:#fff; border:1px solid var(--line); border-radius:999px; padding:7px 14px;}
+  .trust .chip b{color:var(--amber);}
+
+  .diag{background:var(--card); border:1px solid var(--line); border-radius:18px; box-shadow:0 14px 38px rgba(75,65,40,.10); padding:32px 30px 34px; margin-top:30px; position:relative; overflow:hidden;}
+  .diag::before{content:""; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--accent),var(--indigo));}
+  .screen{display:none; animation:fade .45s ease both;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+  @media (prefers-reduced-motion:reduce){ .screen{animation:none;} }
+
+  .progress{display:flex; align-items:center; gap:10px; margin-bottom:22px;}
+  .pbar{flex:1; height:6px; background:var(--line2); border-radius:99px; overflow:hidden;}
+  .pfill{height:100%; width:0; background:var(--accent); border-radius:99px; transition:width .4s ease;}
+  .pstep{font-size:12px; font-weight:700; color:var(--soft); letter-spacing:.08em; white-space:nowrap;}
+
+  .intro-badge{display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--accent-deep); background:var(--vermilion-soft); padding:7px 16px; border-radius:999px; margin-bottom:16px;}
+  .diag h2{font-family:var(--serif); font-weight:800; font-size:28px; line-height:1.5; letter-spacing:.02em; margin:0 0 12px;}
+  .diag .desc{color:var(--muted); font-size:14.5px; line-height:1.95; margin:0 0 24px;}
+  .q{font-size:20.5px; font-weight:800; margin:0 0 20px; line-height:1.6; letter-spacing:.02em;}
+  .q .qn{font-family:var(--serif); color:var(--accent); font-weight:800; font-size:1.18em; margin-right:9px;}
+  .q .sub{display:block; font-size:13px; color:var(--soft); font-weight:500; margin-top:6px; line-height:1.6;}
+
+  .opts{display:flex; flex-direction:column; gap:11px;}
+  .opt{display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left; width:100%; background:var(--paper); border:1.5px solid var(--line); border-radius:12px; padding:15px 18px; font-family:inherit; font-size:15px; font-weight:500; color:var(--ink); cursor:pointer; transition:all .15s ease; line-height:1.55;}
+  .opt:hover{border-color:var(--accent); background:#fff; transform:translateY(-1px); box-shadow:0 4px 14px rgba(28,122,54,.16);}
+  .opt .ico{flex:0 0 auto; font-size:20px; line-height:1;}
+  .opt .lbl{flex:1;}
+  .opt .lbl small{display:block; font-size:12.5px; color:var(--soft); font-weight:500; margin-top:2px;}
+  .opt .chev{color:var(--soft); font-weight:700; flex:0 0 auto;}
+  .opt:hover .chev{color:var(--accent);}
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:inherit; font-weight:700; font-size:16px; letter-spacing:.06em; border:none; border-radius:12px; padding:16px 28px; cursor:pointer; transition:all .15s ease;}
+  .btn-primary{background:var(--accent); color:#fff; box-shadow:0 6px 18px rgba(28,122,54,.30);}
+  .btn .hl{color:#ffd54a; font-weight:900;}  /* バナーの黄色アクセント（無料） */
+  .btn-primary:hover{background:var(--accent-deep); transform:translateY(-1px);}
+  .btn-full{width:100%;}
+  .btn-ghost{background:transparent; color:var(--muted); font-weight:500; font-size:14px; padding:8px 4px; border:none; cursor:pointer; font-family:inherit;}
+  .btn-ghost:hover{color:var(--accent);}
+  .back{margin-top:18px;}
+
+  /* ---- 結果 ---- */
+  .rbadge{display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; padding:7px 16px; border-radius:999px; margin-bottom:14px;}
+  .rbadge.route1{background:var(--teal-soft); color:#0B5C46;}
+  .rbadge.route2{background:var(--blue-soft); color:var(--indigo-deep);}
+  .rbadge.route3{background:var(--amber-soft); color:#7A4E0B;}
+  .rbadge.route4{background:var(--red-soft); color:#7E2516;}
+  .rtitle{font-family:var(--serif); font-weight:800; font-size:26px; line-height:1.55; letter-spacing:.01em; margin:0 0 8px;}
+  .rtitle .em{color:var(--accent);}
+  .rlead{font-size:11.5px; color:var(--accent); font-weight:800; letter-spacing:.18em; margin:0 0 12px;}
+  .rmsg{font-size:15px; color:var(--ink); font-weight:500; margin:0 0 18px; line-height:1.92;}
+  .rmsg b{color:var(--accent-deep);}
+
+  .route{display:flex; gap:14px; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin:0 0 18px;}
+  .route .rk{flex:0 0 auto; width:46px; height:46px; border-radius:12px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px;}
+  .route.r1 .rk{background:var(--teal);} .route.r2 .rk{background:var(--indigo);}
+  .route.r3 .rk{background:var(--amber);} .route.r4 .rk{background:var(--red);}
+  .route .rt{font-weight:800; font-size:16px; margin:0 0 4px;}
+  .route .rd{font-size:13.5px; color:var(--muted); line-height:1.7; margin:0;}
+
+  .sectit{font-size:13px; font-weight:800; color:var(--ink); letter-spacing:.04em; margin:22px 0 12px; display:flex; align-items:center; gap:8px;}
+  .sectit::before{content:""; width:4px; height:16px; background:var(--amber); border-radius:2px;}
+
+  /* 求職者プロフィールカード（「こういう人材が紹介できます」） */
+  .talent{display:grid; grid-template-columns:1fr 1fr; gap:11px;}
+  @media (max-width:560px){ .talent{grid-template-columns:1fr;} }
+  .tcard{background:#fff; border:1px solid var(--line); border-radius:13px; padding:14px; display:flex; gap:12px; align-items:flex-start;}
+  .tcard .av{flex:0 0 auto; width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#4caf50,#2f9e44); color:#fff; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; font-family:var(--serif);}
+  .tcard .tn{font-weight:800; font-size:14.5px; margin:0 0 2px; line-height:1.4;}
+  .tcard .tmeta{font-size:11.5px; color:var(--soft); margin:0 0 7px;}
+  .tcard .ttag{display:inline-block; font-size:11px; font-weight:700; color:var(--accent-deep); background:var(--blue-soft); border-radius:6px; padding:2px 8px; margin:0 4px 4px 0;}
+  .tnote{font-size:12px; color:var(--soft); margin:10px 0 0; text-align:right;}
+  .pool{display:flex; align-items:center; gap:10px; background:var(--teal-soft); border-radius:12px; padding:13px 16px; margin:14px 0 0; font-size:14px; color:#0B5C46; font-weight:700;}
+  .pool .num{font-family:var(--serif); font-size:24px; font-weight:800; color:var(--teal);}
+
+  /* お問い合わせフォーム */
+  .form{background:#eef6ea; border:1px solid #d6e6cf; border-radius:16px; padding:22px 22px 24px; margin-top:24px;}
+  .form h3{font-family:var(--serif); font-weight:800; font-size:19px; margin:0 0 4px;}
+  .form .fdesc{font-size:13px; color:var(--muted); margin:0 0 18px; line-height:1.7;}
+  .field{margin-bottom:13px;}
+  .field label{display:block; font-size:13px; font-weight:700; color:var(--ink); margin-bottom:6px;}
+  .field .opt-tag{font-weight:500; color:var(--soft); font-size:12px;}
+  .field input, .field select, .field textarea{width:100%; font-family:inherit; font-size:15px; color:var(--ink); background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:12px 14px; transition:border-color .15s ease;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--accent);}
+  .field textarea{resize:vertical; min-height:74px; line-height:1.7;}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:11px;}
+  @media (max-width:560px){ .two{grid-template-columns:1fr;} }
+  .err{display:none; color:var(--red); font-size:13px; font-weight:700; margin:2px 0 10px;}
+  .err.show{display:block;}
+  .form .btn-primary{margin-top:6px;}
+  .privacy{font-size:11.5px; color:var(--soft); text-align:center; margin:12px 0 0; line-height:1.6;}
+
+  /* サンキュー */
+  .thanks{text-align:center; padding:18px 0 8px;}
+  .thanks .check{width:70px; height:70px; border-radius:50%; background:var(--teal-soft); margin:0 auto 18px; display:flex; align-items:center; justify-content:center;}
+  .thanks .check span{width:26px; height:14px; border-left:4px solid var(--teal); border-bottom:4px solid var(--teal); transform:rotate(-45deg); margin-top:-6px;}
+  .thanks h2{font-family:var(--serif); margin:0 0 10px;}
+  .thanks p{color:var(--muted); font-size:14.5px; max-width:520px; margin:0 auto 8px;}
+
+  .disc{font-size:11.5px; color:var(--soft); line-height:1.7; margin-top:26px; padding-top:18px; border-top:1px solid var(--line);}
+
+  .footer{text-align:center; color:var(--soft); font-size:12px; padding:30px 0 0;}
+  .footer .hk-logo{height:26px; width:auto; color:var(--ink); margin:0 auto 10px;}
+
+  /* ====== キャラクター（喜怒哀楽の案内役＋にぎやか）======
+     方針：サイズは“高さ”で統一しポーズ差による大小バラつきを排除。
+     吹き出しはゲーム誌のコール風＝太字・緑ボーダー・三角テール。
+     悩み系は無彩色、前向き系は緑、でトーンを描き分ける。 */
+  .m-img{display:block; height:auto; filter:drop-shadow(0 7px 11px rgba(30,50,25,.20)); -webkit-user-drag:none; user-select:none;}
+
+  /* --- 吹き出し共通 --- */
+  .bub,.pb{background:#fff; border:2px solid var(--accent); color:var(--accent-deep); font-weight:800; box-shadow:0 5px 14px rgba(30,60,30,.15);}
+  .bub.worry,.pb.worry{border-color:#cdcabc; color:var(--muted);}
+
+  /* --- 案内役（インライン：キャラ＋吹き出し）--- */
+  .guide{display:flex; align-items:center; gap:15px; margin:20px 0 6px;}
+  .guide.center{justify-content:center;}
+  .guide .gch img{height:94px; width:auto;}
+  .guide .bub{position:relative; border-radius:18px; padding:12px 17px; font-size:14.5px; line-height:1.5;}
+  .guide .bub b{color:var(--accent); font-size:1.05em;}
+  .guide .bub::before{content:""; position:absolute; left:-13px; top:50%; transform:translateY(-50%); border:10px solid transparent; border-right-color:var(--accent);}
+  .guide .bub::after{content:""; position:absolute; left:-9px; top:50%; transform:translateY(-50%); border:8px solid transparent; border-right-color:#fff;}
+
+  /* --- ヒーロー左右の覗きキャラ（広い画面のみ）--- */
+  .hero{position:relative;}
+  .hero-peek{position:absolute; bottom:0; z-index:2;}
+  .hero-peek img{height:132px; width:auto;}           /* 高さ固定で左右の大きさを揃える */
+  .hero-peek.left{left:-72px;} .hero-peek.right{right:-72px;}
+  .hero-peek .pb{position:absolute; top:-26px; left:50%; transform:translateX(-50%); white-space:nowrap; border-radius:14px; padding:6px 13px; font-size:12.5px;}
+  .hero-peek .pb::before{content:""; position:absolute; left:50%; bottom:-11px; transform:translateX(-50%); border:9px solid transparent; border-top-color:var(--accent);}
+  .hero-peek .pb::after{content:""; position:absolute; left:50%; bottom:-8px; transform:translateX(-50%); border:7px solid transparent; border-top-color:#fff;}
+  .hero-peek .pb.worry::before{border-top-color:#cdcabc;}
+  @media (max-width:1023px){ .hero-peek{display:none;} }   /* 余白が足りない画面では非表示 */
+
+  /* --- 結果・サンキューの祝福キャラ --- */
+  .celebrate{display:flex; align-items:flex-end; justify-content:center; gap:12px; margin:2px 0 16px;}
+  .celebrate img{height:96px; width:auto;}
+  /* --- 人材見出し横 --- */
+  .sectit .sch{height:46px; width:auto; margin-left:auto;}
+  /* --- フッターのにぎやか3体 --- */
+  .foot-chars{display:flex; align-items:flex-end; justify-content:center; gap:10px; margin:6px 0 14px;}
+  .foot-chars img{height:78px; width:auto; filter:drop-shadow(0 5px 9px rgba(30,50,25,.16));}
+
+  /* ====== ヒトキワについて（安心・相談したくなる）====== */
+  .about{margin-top:34px; background:linear-gradient(180deg,#ffffff,#eef5ea); border:1px solid var(--line); border-radius:20px; padding:32px 28px 30px; position:relative; overflow:hidden; box-shadow:0 14px 38px rgba(30,60,30,.08);}
+  .about::before{content:""; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--accent),var(--indigo));}
+  .about-kick{display:inline-block; font-size:11px; font-weight:800; letter-spacing:.16em; color:var(--accent); background:var(--vermilion-soft); padding:5px 13px; border-radius:999px; margin-bottom:12px;}
+  .about-h{font-family:var(--serif); font-weight:800; font-size:24px; line-height:1.5; letter-spacing:.02em; margin:0 0 10px;}
+  .about-mission{font-size:14.5px; color:var(--muted); line-height:1.85; margin:0 0 22px;}
+  .about-mission b{color:var(--accent-deep);}
+  .about-grid{display:grid; grid-template-columns:1fr 1fr; gap:13px; margin:0 0 20px;}
+  .ac{background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 17px;}
+  .ac .ai{font-size:22px; line-height:1; margin-bottom:9px;}
+  .ac .at{font-weight:800; font-size:14.5px; color:var(--ink); margin:0 0 5px; line-height:1.5;}
+  .ac p{font-size:12.5px; color:var(--muted); line-height:1.7; margin:0;}
+  .about-cta{display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px;}
+  .about-cta .ach{flex:0 0 auto;}
+  .about-cta .ach img{height:64px; width:auto; filter:drop-shadow(0 5px 9px rgba(30,50,25,.16));}
+  .about-cta .act{flex:1;}
+  .about-cta .act .l1{font-weight:800; font-size:14.5px; color:var(--ink); margin:0 0 7px; line-height:1.55;}
+  .about-note{display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:700; color:var(--accent-deep); text-decoration:none; border:1.5px solid var(--accent); border-radius:999px; padding:7px 15px; transition:all .15s ease;}
+  .about-note:hover{background:var(--accent); color:#fff;}
+  /* 記事・導入事例ギャラリー（noteの記事カバーを掲載） */
+  .about-cases{margin:0 0 20px;}
+  .cases-label{font-size:13px; font-weight:800; color:var(--ink); margin:0 0 12px; display:flex; align-items:center; gap:8px;}
+  .cases-label::before{content:""; width:4px; height:15px; background:var(--accent); border-radius:2px;}
+  .cases-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
+  .case{display:block; text-decoration:none; color:inherit; background:#fff; border:1px solid var(--line); border-radius:13px; overflow:hidden; transition:all .15s ease; box-shadow:0 3px 10px rgba(30,60,30,.06);}
+  .case:hover{transform:translateY(-3px); box-shadow:0 10px 22px rgba(30,60,30,.14); border-color:var(--accent);}
+  .case img{display:block; width:100%; height:auto; border-bottom:1px solid var(--line2);}
+  .case .case-t{display:block; padding:10px 12px; font-size:11.5px; font-weight:700; line-height:1.55; color:var(--ink);}
+  .cases-note{font-size:11px; color:var(--soft); margin:10px 0 0;}
+
+  /* ============ スマホ最適化 ============ */
+  @media (max-width:600px){
+    body{font-size:15.5px; line-height:1.88; letter-spacing:.02em;}
+    .wrap{padding:0 14px 60px;}
+    .bar{padding:12px 16px;}
+    .bar .hk-logo{height:22px;}
+
+    .hero{padding:34px 0 4px;}
+    .hero .kick{font-size:11.5px; letter-spacing:.04em; padding:8px 16px; margin-bottom:16px;}
+    .hero h1{font-size:28px; line-height:1.5; letter-spacing:.01em; margin:0 0 14px;}
+    .hero p{font-size:14px; line-height:1.85;}
+    .hero p br{display:none;}            /* 狭い画面では自然な折り返しに任せる */
+    .hero .punch{font-size:17.5px; margin-top:15px;}
+    .trust{gap:7px; margin-top:18px;}
+    .trust .chip{font-size:11.5px; padding:6px 11px;}
+
+    .diag{padding:24px 17px 26px; border-radius:15px; margin-top:22px;}
+    .diag h2{font-size:23px; line-height:1.48;}
+    .diag .desc{font-size:13.5px;}
+    .intro-badge{font-size:12px; padding:6px 13px;}
+
+    .q{font-size:18px; line-height:1.6; margin-bottom:16px;}
+    .opt{padding:13px 14px; font-size:14.5px; gap:10px;}
+    .opt .ico{font-size:18px;}
+    .opt .lbl small{font-size:12px;}
+    .btn{font-size:15.5px; padding:15px 20px;}
+
+    .rtitle{font-size:22px; line-height:1.5;}
+    .rmsg{font-size:14px;}
+    .route{padding:14px; gap:11px;}
+    .route .rk{width:42px; height:42px; font-size:21px;}
+    .sectit{font-size:12.5px;}
+    .tcard{padding:12px;}
+    .pool{padding:12px 14px; font-size:13px;}
+    .pool .num{font-size:21px;}
+
+    .form{padding:18px 16px 20px;}
+    .form h3{font-size:17.5px;}
+    .form .fdesc{font-size:12.5px;}
+    /* iOSで入力時に画面が拡大しないよう、入力欄は16px以上を維持 */
+    .field input, .field select, .field textarea{font-size:16px; padding:12px;}
+    .field label{font-size:12.5px;}
+
+    .thanks h2{font-size:22px;}
+    .thanks p{font-size:13.5px;}
+    .disc{font-size:11px;}
+    /* キャラクター（スマホ）＝高さで統一 */
+    .guide{gap:12px; margin:16px 0 4px;}
+    .guide .gch img{height:74px;}
+    .guide .bub{font-size:13px; padding:10px 13px;}
+    .celebrate img{height:76px;}
+    .foot-chars img{height:60px;}
+    .sectit .sch{height:36px;}
+    .about{padding:24px 16px 24px;}
+    .about-h{font-size:20px;}
+    .about-grid{grid-template-columns:1fr; gap:11px;}
+    .about-cta{flex-direction:column; text-align:center; gap:10px;}
+    .about-cta .ach img{height:72px;}
+    .cases-grid{grid-template-columns:1fr 1fr; gap:9px;}
+    .case .case-t{font-size:11px; padding:8px 10px;}
+  }
+  @media (max-width:380px){
+    .hero h1{font-size:25px;}
+    .hero .punch{font-size:16.5px;}
+    .diag{padding:20px 14px 22px;}
+    .trust{flex-direction:column; align-items:stretch;}
+    .trust .chip{justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <!-- ヒトキワ公式ロゴ（hito-kiwa.co.jp の logo.svg をインライン化。色は currentColor で可変） -->
+  <svg class="hk-logo" viewBox="0 0 202 61" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="hitokiwa"><g fill="currentColor"><path d="M7.071,42.924C4.413,33.11,3.92,20.5,9.334,0-10,34.234,5.283,50.567,14.3,60.628c-7.15-18.979,5.994-32.7,10.437-13.36C22.669,26.69,7.8,30.438,7.071,42.924"/><path d="M42.037,125.63a3.593,3.593,0,1,1-3.593-3.593,3.593,3.593,0,0,1,3.593,3.593" transform="translate(-27.808 -97.374)"/><path d="M185.779,129.319a6.683,6.683,0,0,0-2.468-1.737,8.929,8.929,0,0,0-3.439-.612,7.956,7.956,0,0,0-2.23.307,8.913,8.913,0,0,0-1.882.78,7.509,7.509,0,0,0-1.271.893V116.635a.687.687,0,0,0-.687-.687h-3.115a.687.687,0,0,0-.687.687v30.191a.687.687,0,0,0,.687.687H173.8a.687.687,0,0,0,.687-.687V137.72a11.034,11.034,0,0,1,.318-2.744,5.953,5.953,0,0,1,.928-2.043,3.919,3.919,0,0,1,1.535-1.26,5.432,5.432,0,0,1,2.322-.454,3.147,3.147,0,0,1,2.689,1.088,5.352,5.352,0,0,1,.9,3.3v11.222a.687.687,0,0,0,.687.687h3.115a.687.687,0,0,0,.687-.687V135.284a11.6,11.6,0,0,0-.447-3.29,7.029,7.029,0,0,0-1.441-2.675" transform="translate(-135.644 -92.516)"/><path d="M296.464,125.433a2.842,2.842,0,0,0-2.111.888,2.963,2.963,0,1,0,4.221,0,2.84,2.84,0,0,0-2.11-.887" transform="translate(-234.186 -100.084)"/><path d="M297.746,192.92h3.115a.687.687,0,0,0,.687-.687v-18.69a.687.687,0,0,0-.687-.687h-3.115a.687.687,0,0,0-.687.687v18.69a.687.687,0,0,0,.687.687" transform="translate(-237.025 -137.924)"/><path d="M359.774,165.244a5.19,5.19,0,0,1-1.2.423,5.8,5.8,0,0,1-1.249.143,2.412,2.412,0,0,1-1.242-.24,1.462,1.462,0,0,1-.576-.629,2.851,2.851,0,0,1-.252-1.1c-.026-.5-.039-1.059-.039-1.661V153.87a.343.343,0,0,1,.344-.344h4.481a.687.687,0,0,0,.687-.687V150.2a.687.687,0,0,0-.687-.687H355.56a.344.344,0,0,1-.344-.344v-4.281a.687.687,0,0,0-.686-.687h-3.115a.687.687,0,0,0-.687.687v4.281a.344.344,0,0,1-.344.344h-3.043a.687.687,0,0,0-.687.687v2.636a.687.687,0,0,0,.687.687h3.043a.343.343,0,0,1,.344.344V163.1a18.183,18.183,0,0,0,.187,2.719,5.3,5.3,0,0,0,.855,2.267,4.319,4.319,0,0,0,1.844,1.473,7.332,7.332,0,0,0,2.952.5,12.324,12.324,0,0,0,1.968-.169,7.833,7.833,0,0,0,1.948-.571.687.687,0,0,0,.4-.656l-.12-2.836a.687.687,0,0,0-.993-.585Z" transform="translate(-276.598 -115.063)"/><path d="M457.233,171.048a9.952,9.952,0,0,0-3.387-2.167,12.135,12.135,0,0,0-8.487,0,9.947,9.947,0,0,0-3.387,2.167,10.159,10.159,0,0,0-2.227,3.317,11.566,11.566,0,0,0,0,8.521,10.159,10.159,0,0,0,2.227,3.318,9.938,9.938,0,0,0,3.387,2.167,12.132,12.132,0,0,0,8.487,0,9.945,9.945,0,0,0,3.387-2.166,10.177,10.177,0,0,0,2.228-3.318,11.577,11.577,0,0,0,0-8.521,10.18,10.18,0,0,0-2.228-3.317m-13.572,7.577a7.268,7.268,0,0,1,.418-2.5,5.624,5.624,0,0,1,3.067-3.281,6.526,6.526,0,0,1,4.915,0,5.623,5.623,0,0,1,3.067,3.281,7.694,7.694,0,0,1,0,5,5.623,5.623,0,0,1-3.068,3.282,6.523,6.523,0,0,1-4.915,0,5.623,5.623,0,0,1-3.067-3.281,7.269,7.269,0,0,1-.418-2.5" transform="translate(-350.226 -134.14)"/><path d="M594.193,127.449H589.76a.687.687,0,0,0-.478.193l-6.759,6.537a.343.343,0,0,1-.582-.247v-17.3a.687.687,0,0,0-.687-.687h-3.115a.687.687,0,0,0-.687.687v30.191a.687.687,0,0,0,.687.687h3.115a.687.687,0,0,0,.687-.687V139.6a.343.343,0,0,1,.593-.236l7.485,7.937a.687.687,0,0,0,.5.215h4.592a.687.687,0,0,0,.492-1.167l-9.455-9.683,8.516-8.027a.687.687,0,0,0-.471-1.187" transform="translate(-460.752 -92.516)"/><path d="M694.131,192.92h3.115a.687.687,0,0,0,.687-.687v-18.69a.687.687,0,0,0-.687-.687h-3.115a.687.687,0,0,0-.687.687v18.69a.687.687,0,0,0,.687.687" transform="translate(-553.303 -137.924)"/><path d="M692.849,125.433a2.843,2.843,0,0,0-2.111.888,2.964,2.964,0,1,0,4.221,0,2.839,2.839,0,0,0-2.11-.887" transform="translate(-550.464 -100.084)"/><path d="M764.569,184.757l-3.907-11.435a.686.686,0,0,0-.65-.465h-3.275a.687.687,0,0,0-.651.468l-3.837,11.418a.343.343,0,0,1-.655-.012l-3.383-11.383a.687.687,0,0,0-.658-.491h-3.434a.687.687,0,0,0-.653.9l6.07,18.69a.687.687,0,0,0,.653.475h3.194a.687.687,0,0,0,.653-.473l3.829-11.681a.343.343,0,0,1,.648-.012l4.329,11.717a.687.687,0,0,0,.645.449h3.075a.687.687,0,0,0,.654-.476l6.03-18.69a.687.687,0,0,0-.654-.9h-3.355a.687.687,0,0,0-.659.493l-3.355,11.393a.344.344,0,0,1-.655.014" transform="translate(-593.188 -137.924)"/><path d="M929.73,186.329c-.051-.542-.077-1.078-.077-1.593v-8.027c0-2.829-.68-4.99-2.023-6.421s-3.538-2.173-6.491-2.173a12.722,12.722,0,0,0-4.242.738,9.516,9.516,0,0,0-3.678,2.345h0a.687.687,0,0,0,0,.955l1.957,2.037a.687.687,0,0,0,.963.027h0a6.487,6.487,0,0,1,2.331-1.391,8.489,8.489,0,0,1,2.753-.462,4.479,4.479,0,0,1,2.968.874,2.894,2.894,0,0,1,.954,2.042.348.348,0,0,1-.343.383h-.145c-1.154,0-2.442.054-3.827.161a15.4,15.4,0,0,0-4.013.837,7.98,7.98,0,0,0-3.251,2.141,5.886,5.886,0,0,0-1.376,4.1,5.663,5.663,0,0,0,.641,2.721,5.916,5.916,0,0,0,1.692,1.963,7.425,7.425,0,0,0,2.418,1.167,10.5,10.5,0,0,0,2.884.386,7.784,7.784,0,0,0,4.046-1.016,8.514,8.514,0,0,0,1.049-.737.341.341,0,0,1,.557.2q.045.286.111.551h0a.686.686,0,0,0,.666.52h3a.687.687,0,0,0,.677-.8c-.077-.466-.142-.98-.193-1.529m-4.909-6.657a.344.344,0,0,1,.344.344v.144a6.617,6.617,0,0,1-.36,1.972,4.584,4.584,0,0,1-.9,1.547,4.328,4.328,0,0,1-1.468,1.05,5.08,5.08,0,0,1-2.094.4,4.778,4.778,0,0,1-2.571-.634,2.059,2.059,0,0,1-.855-1.913,2.168,2.168,0,0,1,1.366-2.136,10.586,10.586,0,0,1,4.457-.771Z" transform="translate(-727.838 -134.14)"/></g></svg>
+  <span class="tagline">外国人材の採用から定着まで、伴走するパートナー</span>
+</div>
+
+<div class="wrap">
+
+  <!-- ヒーロー：「無料紹介」フックではなく「全面相談・伴走」の打ち出し -->
+  <div class="hero">
+    <span class="kick">はじめての外国人採用も、まずは簡易チェック</span>
+    <h1>会社に合う採用のかたちを<br><span class="em">30秒で診断</span></h1>
+    <p>「人手が足りない。外国人採用も気になる。<br>でも、特定技能・技人国・ビザの違いがよくわからない」——そんな御社へ。</p>
+    <p class="punch"><b>30秒・3つの質問</b>に答えるだけ！<span class="sub">御社に合った採用ルートと、いま紹介できる人材イメージがわかります。</span></p>
+    <div class="trust">
+      <span class="chip">✓ 完全<b>無料</b>・登録不要</span>
+      <span class="chip">✓ 入力は<b>30秒</b></span>
+      <span class="chip">✓ しつこい営業はしません</span>
+    </div>
+    <!-- ヒーロー左右の覗きキャラ（広い画面のみ）：哀＝悩み共感／頼れる＝おまかせ -->
+    <div class="hero-peek left"><span class="pb worry">違いがわからない…</span><img class="m-img" src="assets/chars/inshoku_sad.png?v=4" alt=""></div>
+    <div class="hero-peek right"><span class="pb">制度はおまかせ！</span><img class="m-img" src="assets/chars/megane_fun.png?v=4" alt=""></div>
+  </div>
+
+  <div class="diag" id="diag">
+
+    <!-- イントロ -->
+    <div class="screen active" id="s-intro">
+      <span class="intro-badge">◎ 採用ルート診断</span>
+      <h2>あなたの会社に合う<br>外国人採用のかたちを診断します</h2>
+      <p class="desc">外国人採用には「特定技能」「技人国（技術・人文知識・国際業務）」など複数のルートがあり、業種や求める働き方で最適解が変わります。さらに2026年の制度改正で、企業の<b>カテゴリー区分</b>によって手続きの難易度も変わりました。まずは3問でチェックしましょう。</p>
+      <!-- 案内役（喜）：診断スタートへ誘導 -->
+      <div class="guide"><div class="gch"><img class="m-img" src="assets/chars/megane_happy.png?v=4" alt="案内役キャラクター"></div><div class="bub">外国人採用、何から始める？<br><b>まず30秒でチェック！</b></div></div>
+      <button class="btn btn-primary btn-full" onclick="start()">診断をはじめる（<span class="hl">無料</span>・30秒）</button>
+    </div>
+
+    <!-- Q1：採用経験（兼松様：人材不足で外国人採用をやったことあるか） -->
+    <div class="screen" id="s-q1">
+      <div class="progress"><div class="pbar"><div class="pfill" style="width:33%"></div></div><div class="pstep">STEP 1 / 3</div></div>
+      <p class="q"><span class="qn">Q1.</span>外国人材の採用について、御社の状況に近いものは？</p>
+      <div class="opts">
+        <button class="opt" onclick="answer('exp','すでに雇用している',2)"><span class="ico">👥</span><span class="lbl">すでに外国人材を雇用している<small>採用ルートの最適化や手続き負担の軽減を考えたい</small></span><span class="chev">›</span></button>
+        <button class="opt" onclick="answer('exp','過去に検討したが見送った（制度面）',2)"><span class="ico">🤔</span><span class="lbl">過去に検討したが、見送った（手続き・制度面）<small>手続きや制度が難しく、一歩踏み出せなかった</small></span><span class="chev">›</span></button>
+        <button class="opt" onclick="answer('exp','過去に検討したが見送った（費用面）',2)"><span class="ico">💰</span><span class="lbl">過去に検討したが、見送った（費用面）<small>採用費が高く、見送った</small></span><span class="chev">›</span></button>
+        <button class="opt" onclick="answer('exp','はじめて検討している',2)"><span class="ico">🌱</span><span class="lbl">はじめて検討している<small>人手不足で、外国人採用を考えはじめた</small></span><span class="chev">›</span></button>
+      </div>
+    </div>
+
+    <!-- Q2：業種（兼松様：あなたの業種は何ですか） -->
+    <div class="screen" id="s-q2">
+      <div class="progress"><div class="pbar"><div class="pfill" style="width:66%"></div></div><div class="pstep">STEP 2 / 3</div></div>
+      <p class="q"><span class="qn">Q2.</span>御社の業種をお教えください</p>
+      <div class="opts">
+        <button class="opt" onclick="answer('industry','介護',3)"><span class="ico">🧑‍⚕️</span><span class="lbl">介護・福祉</span><span class="chev">›</span></button>
+        <button class="opt" onclick="answer('industry','建設',3)"><span class="ico">🏗️</span><span class="lbl">建設</span><span class="chev">›</span></button>
+        <button class="opt" onclick="answer('industry','製造',3)"><span class="ico">🏭</span><span class="lbl">製造・工場</span><span class="chev">›</span></button>
+        <button class="opt" onclick="answer('industry','農業',3)"><span class="ico">🌾</span><span class="lbl">農業</span><span class="chev">›</span></button>
+        <button class="opt" onclick="answer('industry','飲食',3)"><span class="ico">🍳</span><span class="lbl">飲食業</span><span class="chev">›</span></button>
+        <button class="opt" onclick="answer('industry','宿泊',3)"><span class="ico">🏨</span><span class="lbl">宿泊業</span><span class="chev">›</span></button>
+        <button class="opt" onclick="answer('industry','専門事務',3)"><span class="ico">💼</span><span class="lbl">IT・事務・通訳・貿易など専門職</span><span class="chev">›</span></button>
+        <button class="opt" onclick="answer('industry','その他',3)"><span class="ico">🏢</span><span class="lbl">その他</span><span class="chev">›</span></button>
+      </div>
+      <div class="back"><button class="btn-ghost" onclick="show('s-q1')">‹ 戻る</button></div>
+    </div>
+
+    <!-- Q3：求める働き方（特定技能 vs 技人国 を出し分ける軸） -->
+    <div class="screen" id="s-q3">
+      <div class="progress"><div class="pbar"><div class="pfill" style="width:100%"></div></div><div class="pstep">STEP 3 / 3</div></div>
+      <p class="q"><span class="qn">Q3.</span>どんな人材を求めていますか？<span class="sub">求める働き方によって、合う在留資格（採用ルート）が変わります</span></p>
+      <div class="opts">
+        <button class="opt" onclick="result('field')"><span class="ico">🔧</span><span class="lbl">現場の即戦力・人手として長く働いてほしい<small>製造・介護・建設・農業・外食などの現場業務</small></span><span class="chev">›</span></button>
+        <button class="opt" onclick="result('pro')"><span class="ico">🎓</span><span class="lbl">専門知識・語学・事務を活かせる人材がほしい<small>技術職・通訳・貿易事務・ITなど（大卒・専門卒）</small></span><span class="chev">›</span></button>
+        <button class="opt" onclick="result('unsure')"><span class="ico">💬</span><span class="lbl">正直、どれが合うかわからない<small>うちの状況に合う方法を相談しながら決めたい</small></span><span class="chev">›</span></button>
+      </div>
+      <div class="back"><button class="btn-ghost" onclick="show('s-q2')">‹ 戻る</button></div>
+    </div>
+
+    <!-- 結果 -->
+    <div class="screen" id="s-result">
+      <!-- 祝福（楽）：結果が出た喜びを演出 -->
+      <div class="guide" style="margin-top:0;"><div class="gch"><img class="m-img" src="assets/chars/kensetsu_fun.png?v=4" alt=""></div><div class="bub"><b>ぴったりの採用ルート</b>が見つかりました！</div></div>
+      <div id="r-badge"></div>
+      <p class="rlead">DIAGNOSIS RESULT ／ 御社へのおすすめ</p>
+      <h2 class="rtitle" id="r-title"></h2>
+      <p class="rmsg" id="r-msg"></p>
+
+      <div id="r-route"></div>
+
+      <!-- 「こういう人材が紹介できます」＝求職者イメージ（兼松様ご要望） -->
+      <div class="sectit">いま、こういう人材を紹介できます <img class="sch m-img" src="assets/chars/inshoku_happy.png?v=4" alt=""></div>
+      <div class="talent" id="r-talent"></div>
+      <div class="pool" id="r-pool"></div>
+      <p class="tnote">※ 上記は登録人材のイメージです。実際のご紹介可能な人材は、ご相談時に最新の情報をご案内します。</p>
+
+      <!-- お問い合わせ：診断結果つきで送信 -->
+      <div class="form">
+        <h3 id="f-title">この内容で、無料相談を申し込む</h3>
+        <p class="fdesc">診断結果をもとに、御社に合った採用プランと、紹介できる人材の具体例を担当よりご案内します。<b>採用するかどうかは、話を聞いてから決めて大丈夫です。</b></p>
+        <div class="two">
+          <div class="field"><label>会社名</label><input id="i-company" type="text" placeholder="例）株式会社ヒトキワ"></div>
+          <div class="field"><label>お名前</label><input id="i-name" type="text" placeholder="例）山田 太郎"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>メールアドレス</label><input id="i-email" type="email" placeholder="例）info@example.co.jp"></div>
+          <div class="field"><label>電話番号 <span class="opt-tag">（任意）</span></label><input id="i-tel" type="tel" placeholder="例）03-0000-0000"></div>
+        </div>
+        <div class="field">
+          <label>ご希望の連絡方法 <span class="opt-tag">（任意）</span></label>
+          <select id="i-contact">
+            <option value="">どちらでも</option>
+            <option value="電話">電話で話したい</option>
+            <option value="メール">まずはメールで資料がほしい</option>
+            <option value="オンライン面談">オンラインで面談したい</option>
+          </select>
+        </div>
+        <div class="field"><label>ご相談内容・ご質問 <span class="opt-tag">（任意）</span></label><textarea id="i-msg" placeholder="例）製造ラインの人手が足りず、3名ほど採用を検討しています。"></textarea></div>
+        <div class="err" id="f-err">会社名・お名前・メールアドレスをご入力ください。</div>
+        <button class="btn btn-primary btn-full" onclick="submitForm()">この内容で相談を申し込む</button>
+        <p class="privacy">送信いただいた情報は、ご相談対応の目的にのみ利用します。しつこい勧誘は行いません。</p>
+      </div>
+
+      <div class="back" style="text-align:center;"><button class="btn-ghost" onclick="restart()">↺ もう一度診断する</button></div>
+    </div>
+
+    <!-- サンキュー -->
+    <div class="screen thanks" id="s-thanks">
+      <div class="celebrate"><img src="assets/chars/megane_fun.png?v=4" alt=""><img src="assets/chars/kensetsu_happy.png?v=4" alt=""></div>
+      <div class="check"><span></span></div>
+      <h2>お申し込みありがとうございます</h2>
+      <p id="t-msg">担当より1営業日以内に、ご記入の連絡先へご連絡いたします。</p>
+      <p style="font-size:13px; color:var(--soft);">外国人材の採用、定着まで、ヒトキワが伴走します。どうぞよろしくお願いいたします。</p>
+    </div>
+
+    <p class="disc">
+      本診断は、業種・採用目的に応じた在留資格（採用ルート）の目安をご案内する簡易診断です。「特定技能」「技術・人文知識・国際業務（技人国）」の要件、企業カテゴリー区分・必要書類は、出入国在留管理庁の最新基準にてご確認ください。最終的な可否は個別審査によります。
+    </p>
+  </div>
+
+  <!-- ヒトキワについて（安心感づくり・相談動機）。note(https://note.com/_hitokiwa) の事実を基に作成 -->
+  <section class="about">
+    <span class="about-kick">ABOUT ｜ ヒトキワについて</span>
+    <h2 class="about-h">外国人採用を、<br>はじめから、その先まで。</h2>
+    <p class="about-mission">私たちのミッションは「<b>才能の架け橋を世界に</b>」。<br>日本の人手不足と、世界で活躍したい人の機会を結び、「<b>採用してよかった</b>」と思える出会いを増やします。</p>
+    <div class="about-grid">
+      <div class="ac"><div class="ai">🤝</div><p class="at">紹介して終わり、ではない</p><p>来日する方への日本語・ビジネスマナー教育から、採用後の定着フォローまで一緒に伴走します。</p></div>
+      <div class="ac"><div class="ai">🏭</div><p class="at">業種を問わない導入実績</p><p>介護・建設・製造・飲食・食品・造園など、幅広い現場での外国人採用を支援してきました。</p></div>
+      <div class="ac"><div class="ai">💰</div><p class="at">採用コストの不安にも</p><p>「広告費をかけても採れなかった」企業が採用に成功した事例も多数。紹介料0円での採用事例もあります。</p></div>
+      <div class="ac"><div class="ai">🌏</div><p class="at">文化の壁を越えるチーム</p><p>多国籍・多様な経歴のスタッフが、文化の違いに寄り添いながら、企業と人材の橋渡しをします。</p></div>
+    </div>
+    <!-- 記事・導入事例ギャラリー（noteの記事カバーを掲載。リンクは個別記事へ） -->
+    <div class="about-cases">
+      <p class="cases-label">ヒトキワの取り組み・導入事例（一部）</p>
+      <div class="cases-grid">
+        <a class="case" href="https://note.com/_hitokiwa/n/n11fdc7b58dbe" target="_blank" rel="noopener"><img src="assets/note/note_daihyo.jpg" alt="代表インタビュー：才能の架け橋を世界に" loading="lazy"><span class="case-t">代表インタビュー｜才能の架け橋を世界に</span></a>
+        <a class="case" href="https://note.com/_hitokiwa/n/n4f3fa0d243b0" target="_blank" rel="noopener"><img src="assets/note/note_kaigo.jpg" alt="介護・医療業界の活用事例" loading="lazy"><span class="case-t">活用事例｜介護・医療業界</span></a>
+        <a class="case" href="https://note.com/_hitokiwa/n/ne36aff0e7bd3" target="_blank" rel="noopener"><img src="assets/note/note_kensetsu.jpg" alt="建設業界の活用事例" loading="lazy"><span class="case-t">活用事例｜建設業界（技術継承）</span></a>
+        <a class="case" href="https://note.com/_hitokiwa/n/nd9392504b9a5" target="_blank" rel="noopener"><img src="assets/note/note_yogashi.jpg" alt="洋菓子メーカーの活用事例" loading="lazy"><span class="case-t">活用事例｜洋菓子メーカー</span></a>
+        <a class="case" href="https://note.com/_hitokiwa/n/n171047691842" target="_blank" rel="noopener"><img src="assets/note/note_chuka.jpg" alt="横浜の中華料理店の活用事例（紹介料0円）" loading="lazy"><span class="case-t">活用事例｜中華料理店（紹介料0円）</span></a>
+        <a class="case" href="https://note.com/_hitokiwa/n/n320feed34548" target="_blank" rel="noopener"><img src="assets/note/note_zoen.jpg" alt="造園業の活用事例" loading="lazy"><span class="case-t">活用事例｜造園業</span></a>
+      </div>
+      <p class="cases-note">※ 画像はヒトキワ公式note（自社メディア）の記事です。ほかにも多数の事例があります。</p>
+    </div>
+    <div class="about-cta">
+      <div class="ach"><img src="assets/chars/megane_happy.png?v=4" alt=""></div>
+      <div class="act">
+        <p class="l1" style="margin-bottom:0;">「まずは話を聞いてみたい」「うちでもできる？」——その段階で大丈夫です。お気軽にご相談ください。</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <div class="foot-chars">
+      <img src="assets/chars/kensetsu_happy.png?v=4" alt="">
+      <img src="assets/chars/megane_happy.png?v=4" alt="">
+      <img src="assets/chars/inshoku_fun.png?v=4" alt="">
+    </div>
+    <svg class="hk-logo" viewBox="0 0 202 61" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="hitokiwa"><g fill="currentColor"><path d="M7.071,42.924C4.413,33.11,3.92,20.5,9.334,0-10,34.234,5.283,50.567,14.3,60.628c-7.15-18.979,5.994-32.7,10.437-13.36C22.669,26.69,7.8,30.438,7.071,42.924"/><path d="M42.037,125.63a3.593,3.593,0,1,1-3.593-3.593,3.593,3.593,0,0,1,3.593,3.593" transform="translate(-27.808 -97.374)"/><path d="M185.779,129.319a6.683,6.683,0,0,0-2.468-1.737,8.929,8.929,0,0,0-3.439-.612,7.956,7.956,0,0,0-2.23.307,8.913,8.913,0,0,0-1.882.78,7.509,7.509,0,0,0-1.271.893V116.635a.687.687,0,0,0-.687-.687h-3.115a.687.687,0,0,0-.687.687v30.191a.687.687,0,0,0,.687.687H173.8a.687.687,0,0,0,.687-.687V137.72a11.034,11.034,0,0,1,.318-2.744,5.953,5.953,0,0,1,.928-2.043,3.919,3.919,0,0,1,1.535-1.26,5.432,5.432,0,0,1,2.322-.454,3.147,3.147,0,0,1,2.689,1.088,5.352,5.352,0,0,1,.9,3.3v11.222a.687.687,0,0,0,.687.687h3.115a.687.687,0,0,0,.687-.687V135.284a11.6,11.6,0,0,0-.447-3.29,7.029,7.029,0,0,0-1.441-2.675" transform="translate(-135.644 -92.516)"/><path d="M296.464,125.433a2.842,2.842,0,0,0-2.111.888,2.963,2.963,0,1,0,4.221,0,2.84,2.84,0,0,0-2.11-.887" transform="translate(-234.186 -100.084)"/><path d="M297.746,192.92h3.115a.687.687,0,0,0,.687-.687v-18.69a.687.687,0,0,0-.687-.687h-3.115a.687.687,0,0,0-.687.687v18.69a.687.687,0,0,0,.687.687" transform="translate(-237.025 -137.924)"/><path d="M359.774,165.244a5.19,5.19,0,0,1-1.2.423,5.8,5.8,0,0,1-1.249.143,2.412,2.412,0,0,1-1.242-.24,1.462,1.462,0,0,1-.576-.629,2.851,2.851,0,0,1-.252-1.1c-.026-.5-.039-1.059-.039-1.661V153.87a.343.343,0,0,1,.344-.344h4.481a.687.687,0,0,0,.687-.687V150.2a.687.687,0,0,0-.687-.687H355.56a.344.344,0,0,1-.344-.344v-4.281a.687.687,0,0,0-.686-.687h-3.115a.687.687,0,0,0-.687.687v4.281a.344.344,0,0,1-.344.344h-3.043a.687.687,0,0,0-.687.687v2.636a.687.687,0,0,0,.687.687h3.043a.343.343,0,0,1,.344.344V163.1a18.183,18.183,0,0,0,.187,2.719,5.3,5.3,0,0,0,.855,2.267,4.319,4.319,0,0,0,1.844,1.473,7.332,7.332,0,0,0,2.952.5,12.324,12.324,0,0,0,1.968-.169,7.833,7.833,0,0,0,1.948-.571.687.687,0,0,0,.4-.656l-.12-2.836a.687.687,0,0,0-.993-.585Z" transform="translate(-276.598 -115.063)"/><path d="M457.233,171.048a9.952,9.952,0,0,0-3.387-2.167,12.135,12.135,0,0,0-8.487,0,9.947,9.947,0,0,0-3.387,2.167,10.159,10.159,0,0,0-2.227,3.317,11.566,11.566,0,0,0,0,8.521,10.159,10.159,0,0,0,2.227,3.318,9.938,9.938,0,0,0,3.387,2.167,12.132,12.132,0,0,0,8.487,0,9.945,9.945,0,0,0,3.387-2.166,10.177,10.177,0,0,0,2.228-3.318,11.577,11.577,0,0,0,0-8.521,10.18,10.18,0,0,0-2.228-3.317m-13.572,7.577a7.268,7.268,0,0,1,.418-2.5,5.624,5.624,0,0,1,3.067-3.281,6.526,6.526,0,0,1,4.915,0,5.623,5.623,0,0,1,3.067,3.281,7.694,7.694,0,0,1,0,5,5.623,5.623,0,0,1-3.068,3.282,6.523,6.523,0,0,1-4.915,0,5.623,5.623,0,0,1-3.067-3.281,7.269,7.269,0,0,1-.418-2.5" transform="translate(-350.226 -134.14)"/><path d="M594.193,127.449H589.76a.687.687,0,0,0-.478.193l-6.759,6.537a.343.343,0,0,1-.582-.247v-17.3a.687.687,0,0,0-.687-.687h-3.115a.687.687,0,0,0-.687.687v30.191a.687.687,0,0,0,.687.687h3.115a.687.687,0,0,0,.687-.687V139.6a.343.343,0,0,1,.593-.236l7.485,7.937a.687.687,0,0,0,.5.215h4.592a.687.687,0,0,0,.492-1.167l-9.455-9.683,8.516-8.027a.687.687,0,0,0-.471-1.187" transform="translate(-460.752 -92.516)"/><path d="M694.131,192.92h3.115a.687.687,0,0,0,.687-.687v-18.69a.687.687,0,0,0-.687-.687h-3.115a.687.687,0,0,0-.687.687v18.69a.687.687,0,0,0,.687.687" transform="translate(-553.303 -137.924)"/><path d="M692.849,125.433a2.843,2.843,0,0,0-2.111.888,2.964,2.964,0,1,0,4.221,0,2.839,2.839,0,0,0-2.11-.887" transform="translate(-550.464 -100.084)"/><path d="M764.569,184.757l-3.907-11.435a.686.686,0,0,0-.65-.465h-3.275a.687.687,0,0,0-.651.468l-3.837,11.418a.343.343,0,0,1-.655-.012l-3.383-11.383a.687.687,0,0,0-.658-.491h-3.434a.687.687,0,0,0-.653.9l6.07,18.69a.687.687,0,0,0,.653.475h3.194a.687.687,0,0,0,.653-.473l3.829-11.681a.343.343,0,0,1,.648-.012l4.329,11.717a.687.687,0,0,0,.645.449h3.075a.687.687,0,0,0,.654-.476l6.03-18.69a.687.687,0,0,0-.654-.9h-3.355a.687.687,0,0,0-.659.493l-3.355,11.393a.344.344,0,0,1-.655.014" transform="translate(-593.188 -137.924)"/><path d="M929.73,186.329c-.051-.542-.077-1.078-.077-1.593v-8.027c0-2.829-.68-4.99-2.023-6.421s-3.538-2.173-6.491-2.173a12.722,12.722,0,0,0-4.242.738,9.516,9.516,0,0,0-3.678,2.345h0a.687.687,0,0,0,0,.955l1.957,2.037a.687.687,0,0,0,.963.027h0a6.487,6.487,0,0,1,2.331-1.391,8.489,8.489,0,0,1,2.753-.462,4.479,4.479,0,0,1,2.968.874,2.894,2.894,0,0,1,.954,2.042.348.348,0,0,1-.343.383h-.145c-1.154,0-2.442.054-3.827.161a15.4,15.4,0,0,0-4.013.837,7.98,7.98,0,0,0-3.251,2.141,5.886,5.886,0,0,0-1.376,4.1,5.663,5.663,0,0,0,.641,2.721,5.916,5.916,0,0,0,1.692,1.963,7.425,7.425,0,0,0,2.418,1.167,10.5,10.5,0,0,0,2.884.386,7.784,7.784,0,0,0,4.046-1.016,8.514,8.514,0,0,0,1.049-.737.341.341,0,0,1,.557.2q.045.286.111.551h0a.686.686,0,0,0,.666.52h3a.687.687,0,0,0,.677-.8c-.077-.466-.142-.98-.193-1.529m-4.909-6.657a.344.344,0,0,1,.344.344v.144a6.617,6.617,0,0,1-.36,1.972,4.584,4.584,0,0,1-.9,1.547,4.328,4.328,0,0,1-1.468,1.05,5.08,5.08,0,0,1-2.094.4,4.778,4.778,0,0,1-2.571-.634,2.059,2.059,0,0,1-.855-1.913,2.168,2.168,0,0,1,1.366-2.136,10.586,10.586,0,0,1,4.457-.771Z" transform="translate(-727.838 -134.14)"/></g></svg>
+    <div>外国人材の採用から定着まで｜特定技能・技人国・カテゴリー対策のご相談はお気軽に</div>
+  </div>
+
+</div>
+
+<script>
+  /* ====== 運用設定 ====== */
+  var CONFIG = {
+    // ↓ Google Apps Script のWebアプリURLを貼ると、回答が自動でスプレッドシート（Drive）に保存＋営業へメール通知されます。
+    //    設定手順は「gas-hitokiwa-shindan/SETUP.md」を参照。未設定（空のまま）でも画面はデモとして動作します。
+    GAS_URL: "",
+    // 入口の既定の識別名。URLに広告パラメータ（?utm_campaign=... や ?ad=...）が付いていれば、そちらを優先します。
+    SOURCE: "外国人採用適性診断"
+  };
+
+  /* ====== 広告ひも付け（アド・アトリビューション） ======
+     各広告のリンク末尾にパラメータを付けるだけで、「どの広告から来た診断か」を回答と一緒に記録できます。
+     例）Meta広告A：  https://（このページのURL）?utm_source=meta&utm_medium=cpc&utm_campaign=農業_特定技能&utm_content=動画A&ad=metaA
+        Google広告： https://（このページのURL）?utm_source=google&utm_medium=cpc&utm_campaign=介護&gclid=...
+     これにより、対馬よりご説明した「入口別にシートを分けてA/B比較」が、広告単位で自動で行えます。
+     gclid（Google）/ fbclid（Meta）も自動取得します。 */
+  function captureAd(){
+    var KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','fbclid','ad','src'];
+    var saved = {};
+    try{ saved = JSON.parse(sessionStorage.getItem('hk_ad') || '{}'); }catch(_){ saved = {}; }
+    var qs = new URLSearchParams(location.search);
+    var has = false;
+    KEYS.forEach(function(k){
+      var v = qs.get(k);
+      if(v){ saved[k] = v; has = true; }
+    });
+    // 初回到達日時とリファラ（流入元ページ）も記録
+    if(has || !saved.first_seen){
+      if(!saved.first_seen) saved.first_seen = new Date().toISOString();
+      if(!saved.referrer) saved.referrer = document.referrer || '';
+    }
+    try{ sessionStorage.setItem('hk_ad', JSON.stringify(saved)); }catch(_){}
+    return saved;
+  }
+  var AD = captureAd();
+  // 広告名（ad / utm_campaign）があれば、入口の識別名をその広告名で上書き（A/B比較しやすく）
+  var ENTRY_SOURCE = AD.ad || AD.utm_campaign || CONFIG.SOURCE;
+
+  var data = { exp:null, industry:null, jobtype:null, route:null, started_at:null };
+
+  /* ====== 業種別：紹介できる求職者プロフィール（イメージ／デモ用） ======
+     ※実データではなく、見せ方の雛形です。実運用では登録人材データと差し替え可能です。 */
+  var TALENT = {
+    "介護":   [
+      {ini:"N", name:"グエンさん（26）", meta:"ベトナム出身／来日2年", tags:["介護施設で実務2年","日本語 N3","特定技能 介護"]},
+      {ini:"D", name:"デウィさん（24）", meta:"インドネシア出身", tags:["介護初任者研修 修了","日本語 N4","就労意欲◎"]}
+    ],
+    "建設":   [
+      {ini:"S", name:"サントソさん（29）", meta:"インドネシア出身／来日3年", tags:["型枠・鉄筋 経験3年","特定技能 建設","フォークリフト免許"]},
+      {ini:"R", name:"ラクシュさん（27）", meta:"ネパール出身", tags:["土木作業 経験あり","日本語 N4","長期就労 希望"]}
+    ],
+    "製造":   [
+      {ini:"P", name:"フィリップさん（28）", meta:"フィリピン出身／来日2年", tags:["金属プレス・組立","特定技能 工業製品","夜勤対応可"]},
+      {ini:"T", name:"タンさん（25）", meta:"ベトナム出身", tags:["電子部品 検査経験","日本語 N3","真面目・定着志向"]}
+    ],
+    "農業":   [
+      {ini:"M", name:"モモさん（24）", meta:"ミャンマー出身", tags:["施設園芸 経験","特定技能 農業","繁忙期 即対応可"]},
+      {ini:"K", name:"カインさん（26）", meta:"ベトナム出身／来日1年", tags:["露地野菜 収穫経験","日本語 N4","体力◎"]}
+    ],
+    "飲食":[
+      {ini:"R", name:"ラジさん（25）", meta:"ネパール出身／来日2年", tags:["ホール・調理補助","特定技能 外食","接客 丁寧"]},
+      {ini:"T", name:"トゥアンさん（26）", meta:"ベトナム出身", tags:["調理・仕込み経験","特定技能 外食","土日勤務可"]}
+    ],
+    "宿泊":[
+      {ini:"A", name:"アインさん（27）", meta:"ベトナム出身", tags:["ホテル清掃・客室","特定技能 宿泊","日本語 N3"]},
+      {ini:"S", name:"スリヤさん（24）", meta:"スリランカ出身", tags:["フロント・接客補助","日本語 N3","笑顔◎"]}
+    ],
+    "専門事務":[
+      {ini:"L", name:"リンさん（30）", meta:"ベトナム出身／大卒（機械工学）", tags:["機械設計 補助","技人国","日本語 N2・英語可"]},
+      {ini:"C", name:"チェンさん（28）", meta:"中国出身／大卒", tags:["貿易事務・通訳","技人国","日本語 N1・中英対応"]}
+    ],
+    "その他": [
+      {ini:"V", name:"ヴァンさん（27）", meta:"ベトナム出身／来日2年", tags:["複数業種で就労経験","日本語 N3","柔軟に対応可"]},
+      {ini:"S", name:"スレシュさん（29）", meta:"スリランカ出身", tags:["長期就労 希望","日本語 N4","学習意欲◎"]}
+    ]
+  };
+  var POOL = {
+    "介護":"約120名","建設":"約90名","製造":"約140名","農業":"約60名","飲食":"約90名","宿泊":"約50名","専門事務":"約70名","その他":"多数"
+  };
+
+  /* ====== 結果（採用ルート）の定義 ======
+     route: field=特定技能 / pro=技人国 / cat=カテゴリー対策 / consult=まず相談 */
+  var ROUTES = {
+    field: {
+      cls:"route1", rcls:"r1", icon:"🔧",
+      badge:"✓ 診断結果：特定技能ルートがおすすめ",
+      title:'御社には<span class="em">「特定技能」</span>での採用が合っています',
+      msg:'現場の人手として長く働いてもらうなら、<b>特定技能</b>がもっともスムーズです。一定の技能と日本語力を持つ即戦力を、業種に合わせてご紹介できます。技能実習からの移行・他社からの転職受入にも対応します。<b>「いる人材から選ぶ」</b>ので、最短ルートで採用に進めます。',
+      rt:"特定技能での採用サポート", rd:"業種に合った人材のご紹介から、在留資格の申請手続き、入社後の定着フォローまで一気通貫で伴走します。"
+    },
+    pro: {
+      cls:"route2", rcls:"r2", icon:"🎓",
+      badge:"✓ 診断結果：技人国ルートがおすすめ",
+      title:'御社には<span class="em">「技人国」</span>での採用が合っています',
+      msg:'専門知識・語学・事務を活かす職種なら、<b>技術・人文知識・国際業務（技人国）</b>での採用が向いています。ただし2026年の制度改正で審査が厳格化し、企業の<b>カテゴリー区分</b>によっては日本語能力（N2相当）の証明などが必要になりました。御社の区分を踏まえた採用設計が成否を分けます。',
+      rt:"技人国 ＋ カテゴリー対策", rd:"大卒・専門卒の人材ご紹介に加え、御社のカテゴリー判定と、必要書類・カテゴリー②化の準備までサポートします。"
+    },
+    cat: {
+      cls:"route3", rcls:"r3", icon:"📑",
+      badge:"⚠ 診断結果：手続き負担は「カテゴリー対策」で軽くできます",
+      title:'<span class="em">「カテゴリー②化」</span>で、採用も更新もラクになります',
+      msg:'すでに雇用されている御社は、<b>企業カテゴリーの引き上げ（②化）</b>で手続き負担を大きく減らせます。在留申請オンラインシステムの利用承認などでカテゴリー②扱いになれば、技人国の追加書類やN2要件の壁を回避しやすくなり、次の採用・更新がスムーズになります。あわせて特定技能との<b>棲み分け・併用</b>もご提案できます。',
+      rt:"カテゴリー②化 ＋ 採用の最適化", rd:"現状のカテゴリー判定、②化に向けた準備、特定技能/技人国の棲み分け設計まで、まるごと伴走します。"
+    },
+    consult: {
+      cls:"route4", rcls:"r4", icon:"💬",
+      badge:"◎ 診断結果：まずは一緒に方針を決めましょう",
+      title:'御社に最適なルートを<span class="em">一緒に設計</span>します',
+      msg:'「どれが合うかわからない」——それでまったく問題ありません。むしろ<b>そこから一緒に考えるのがヒトキワの役割</b>です。業種・人数・予算・時期を伺って、特定技能／技人国／カテゴリー対策の中から、御社にいちばん無理のない採用プランをご提案します。<b>外国人雇用なら、ヒトキワに全面的にご相談ください。</b>',
+      rt:"無料の採用方針コンサルティング", rd:"現状ヒアリングから、最適な在留資格の選定、人材紹介、手続き、定着支援まで。御社の専属チームとして伴走します。"
+    }
+  };
+
+  /* ====== 画面遷移 ====== */
+  function show(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    document.getElementById('diag').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function start(){ data.started_at = new Date().toISOString(); show('s-q1'); }
+  function answer(key, val, next){ data[key]=val; show('s-q'+next); }
+
+  /* ====== 結果判定ロジック ======
+     Q3（求める働き方）を主軸に、Q1（採用経験）・Q2（業種）で補正。 */
+  function result(jobtype){
+    data.jobtype = jobtype;
+    var route;
+
+    if(jobtype === 'unsure'){
+      route = 'consult';
+    } else if(jobtype === 'pro' || data.industry === '専門事務'){
+      // 専門職志向 → 技人国。ただし既に雇用中なら、まずカテゴリー対策の効果が大きい。
+      route = (data.exp === 'すでに雇用している') ? 'cat' : 'pro';
+    } else { // field
+      // 現場人手 → 特定技能。専門職業種を選んだ人が現場人手を求めるケースもそのまま特定技能。
+      route = 'field';
+    }
+    data.route = route;
+
+    var R = ROUTES[route];
+    document.getElementById('r-badge').innerHTML =
+      '<span class="rbadge '+R.cls+'">'+R.badge+'</span>';
+    document.getElementById('r-title').innerHTML = R.title;
+    document.getElementById('r-msg').innerHTML = R.msg;
+    document.getElementById('r-route').innerHTML =
+      '<div class="route '+R.rcls+'"><div class="rk">'+R.icon+'</div>'
+      +'<div><p class="rt">'+R.rt+'</p><p class="rd">'+R.rd+'</p></div></div>';
+
+    // 紹介できる人材（業種ベース）
+    var ind = data.industry || 'その他';
+    var list = TALENT[ind] || TALENT['その他'];
+    document.getElementById('r-talent').innerHTML = list.map(function(t){
+      return '<div class="tcard"><div class="av">'+t.ini+'</div><div>'
+        +'<p class="tn">'+t.name+'</p><p class="tmeta">'+t.meta+'</p>'
+        +t.tags.map(function(g){ return '<span class="ttag">'+g+'</span>'; }).join('')
+        +'</div></div>';
+    }).join('');
+    document.getElementById('r-pool').innerHTML =
+      '<span class="num">'+(POOL[ind]||'多数')+'</span><span>の'+labelIndustry(ind)+'人材が、いま就業先を探しています</span>';
+
+    show('s-result');
+  }
+
+  function labelIndustry(ind){
+    var m={"介護":"介護・福祉","建設":"建設","製造":"製造・工場","農業":"農業","飲食":"飲食業","宿泊":"宿泊業","専門事務":"専門職","その他":"各業種の"};
+    return m[ind]||"";
+  }
+
+  /* ====== 送信 ====== */
+  function submitForm(){
+    var c=val('i-company'), n=val('i-name'), e=val('i-email');
+    var err=document.getElementById('f-err');
+    if(!c || !n || !e || e.indexOf('@')<1){ err.classList.add('show'); return; }
+    err.classList.remove('show');
+
+    var payload = {
+      source: ENTRY_SOURCE,                 // 入口識別（広告名があれば広告名）
+      timestamp: new Date().toISOString(),
+      started_at: data.started_at,
+      company: c, name: n, email: e,
+      tel: val('i-tel'),
+      contact_pref: val('i-contact'),
+      message: val('i-msg'),
+      q1_exp: data.exp,
+      q2_industry: data.industry,
+      q3_jobtype: data.jobtype,
+      result_route: data.route,
+      page_url: location.href,
+      // ▼ 広告ひも付け情報（どの広告・キャンペーンから来たか）
+      ad_campaign: AD.utm_campaign || AD.ad || '',
+      ad_source: AD.utm_source || '',
+      ad_medium: AD.utm_medium || '',
+      ad_content: AD.utm_content || '',
+      ad_term: AD.utm_term || '',
+      gclid: AD.gclid || '',
+      fbclid: AD.fbclid || '',
+      referrer: AD.referrer || '',
+      ad_first_seen: AD.first_seen || ''
+    };
+
+    // GAS_URL が設定されていれば、スプレッドシートへ自動保存＋営業へメール通知。
+    if(CONFIG.GAS_URL){
+      try{
+        fetch(CONFIG.GAS_URL, {
+          method:'POST', mode:'no-cors',
+          headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body: JSON.stringify(payload)
+        });
+      }catch(_){ /* 送信失敗でも画面は完了に進める（取りこぼし防止） */ }
+    } else {
+      // 未設定時：開発確認用にコンソールへ出力（運用では上のGAS送信が動きます）
+      console.log('[診断フォーム] 送信内容（GAS_URL未設定のためコンソール出力）', payload);
+    }
+
+    document.getElementById('t-msg').textContent =
+      n + '様（' + c + '）、ありがとうございます。担当より1営業日以内に、ご記入の連絡先へご連絡いたします。';
+    show('s-thanks');
+  }
+
+  function val(id){ return (document.getElementById(id).value||'').trim(); }
+
+  function restart(){
+    data = { exp:null, industry:null, jobtype:null, route:null, started_at:null };
+    ['i-company','i-name','i-email','i-tel','i-msg'].forEach(function(id){ document.getElementById(id).value=''; });
+    document.getElementById('i-contact').value='';
+    document.getElementById('f-err').classList.remove('show');
+    show('s-intro');
+  }
+</script>
+</body>
+</html>
