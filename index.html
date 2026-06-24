@@ -482,6 +482,38 @@
       <div class="back" style="text-align:center;"><button class="btn-ghost" onclick="restart()">↺ もう一度診断する</button></div>
     </div>
 
+    <!-- 単独のお問い合わせ画面（メールの導線などから ?contact=1 で開く） -->
+    <div class="screen" id="s-contact">
+      <div class="guide" style="margin-top:0;"><div class="gch"><img class="m-img" src="assets/chars/megane_happy.png?v=4" alt=""></div><div class="bub"><b>お気軽にご相談ください！</b></div></div>
+      <span class="intro-badge">◎ お問い合わせ・無料相談</span>
+      <h2 class="gate-h">お問い合わせ・<span class="em">無料相談</span></h2>
+      <p class="desc">外国人採用について、御社専任の担当が、最適な採用ルート・ご紹介できる人材・費用感までご案内します。<b>その場で採用を決める必要はありません。</b></p>
+      <div class="form" style="margin-top:6px;">
+        <div class="two">
+          <div class="field"><label>会社名</label><input id="c-company" type="text" placeholder="例）株式会社ヒトキワ"></div>
+          <div class="field"><label>お名前</label><input id="c-name" type="text" placeholder="例）山田 太郎"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>メールアドレス</label><input id="c-email" type="email" placeholder="例）info@example.co.jp"></div>
+          <div class="field"><label>電話番号 <span class="opt-tag">（任意）</span></label><input id="c-tel" type="tel" placeholder="例）03-0000-0000"></div>
+        </div>
+        <div class="field">
+          <label>ご希望の進め方 <span class="opt-tag">（任意）</span></label>
+          <select id="c-contact">
+            <option value="">どちらでも</option>
+            <option value="オンライン面談">オンラインで面談したい</option>
+            <option value="電話">電話で話したい</option>
+            <option value="メールで資料">まずはメールで資料がほしい</option>
+          </select>
+        </div>
+        <div class="field"><label>ご相談内容・ご希望日時 <span class="opt-tag">（任意）</span></label><textarea id="c-msg" placeholder="例）来週の午後にオンラインで。製造ラインで3名ほど検討中です。"></textarea></div>
+        <div class="err" id="c-err">会社名・お名前・メールアドレスをご入力ください。</div>
+        <button class="btn btn-primary btn-full" onclick="submitContact()">この内容で問い合わせる</button>
+        <p class="privacy">送信いただいた情報は、ご相談対応の目的にのみ利用します。</p>
+      </div>
+      <div class="back" style="text-align:center;"><button class="btn-ghost" onclick="restart()">‹ 診断からはじめる</button></div>
+    </div>
+
     <!-- サンキュー -->
     <div class="screen thanks" id="s-thanks">
       <div class="celebrate"><img src="assets/chars/megane_fun.png?v=4" alt=""><img src="assets/chars/kensetsu_happy.png?v=4" alt=""></div>
@@ -807,14 +839,44 @@
     } else { box.innerHTML=''; }
   }
 
+  /* ③ メール導線などからの単独お問い合わせ（診断を経由しない相談） */
+  function submitContact(){
+    var c=val('c-company'), n=val('c-name'), e=val('c-email');
+    var err=document.getElementById('c-err');
+    if(!c || !n || e.indexOf('@')<1){ err.classList.add('show'); return; }
+    err.classList.remove('show');
+    data.company=c; data.email=e;
+    var p=basePayload();
+    p.source='メール経由のお問い合わせ';
+    p.stage='② 問い合わせ済み';
+    p.name=n; p.tel=val('c-tel'); p.contact_pref=val('c-contact'); p.message=val('c-msg');
+    sendToGAS(p);
+    document.getElementById('t-msg').textContent =
+      n + '様（' + c + '）、ありがとうございます。内容を確認のうえ、担当者より順次ご連絡いたします。';
+    show('s-thanks');
+  }
+
   function restart(){
     data = { exp:null, industry:null, jobtype:null, route:null, started_at:null, company:null, email:null };
-    ['g-company','g-email','i-company','i-email','i-name','i-tel','i-msg'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+    ['g-company','g-email','i-company','i-email','i-name','i-tel','i-msg','c-company','c-name','c-email','c-tel','c-msg'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
     document.getElementById('i-contact').value='';
-    document.getElementById('g-err').classList.remove('show');
-    document.getElementById('f-err').classList.remove('show');
+    document.getElementById('c-contact').value='';
+    ['g-err','f-err','c-err'].forEach(function(id){ document.getElementById(id).classList.remove('show'); });
     show('s-intro');
   }
+
+  /* メールの「お問い合わせはこちら」リンク（?contact=1）で問い合わせ画面を直接開く */
+  (function initFromUrl(){
+    try{
+      var q=new URLSearchParams(location.search);
+      if(q.get('contact')==='1' || location.hash==='#contact'){
+        var co=q.get('company'), em=q.get('email');
+        if(co) document.getElementById('c-company').value=co;
+        if(em) document.getElementById('c-email').value=em;
+        show('s-contact');
+      }
+    }catch(_){}
+  })();
 </script>
 </body>
 </html>
