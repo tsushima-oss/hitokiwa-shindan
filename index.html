@@ -173,6 +173,7 @@
   .field label{display:block; font-size:13px; font-weight:700; color:var(--ink); margin-bottom:6px;}
   .field .opt-tag{font-weight:500; color:var(--soft); font-size:12px;}
   .field input, .field select, .field textarea{width:100%; font-family:inherit; font-size:15px; color:var(--ink); background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:12px 14px; transition:border-color .15s ease;}
+  .field input[readonly]{background:#eef2ea; color:var(--muted); cursor:default; border-style:dashed;}
   .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--accent);}
   .field textarea{resize:vertical; min-height:74px; line-height:1.7;}
   .two{display:grid; grid-template-columns:1fr 1fr; gap:11px;}
@@ -455,6 +456,10 @@
         <h3 id="f-title">無料オンライン相談・面談を申し込む</h3>
         <p class="fdesc">診断結果をもとに、御社専任の担当が最適な採用プラン・紹介できる人材・費用感までご案内します。<b>その場で採用を決める必要はありません。</b></p>
         <div id="r-calendly"></div>
+        <div class="two">
+          <div class="field"><label>会社名 <span class="opt-tag">（入力済み）</span></label><input id="i-company" type="text" readonly></div>
+          <div class="field"><label>メールアドレス <span class="opt-tag">（入力済み）</span></label><input id="i-email" type="email" readonly></div>
+        </div>
         <div class="two">
           <div class="field"><label>お名前</label><input id="i-name" type="text" placeholder="例）山田 太郎"></div>
           <div class="field"><label>電話番号 <span class="opt-tag">（任意）</span></label><input id="i-tel" type="tel" placeholder="例）03-0000-0000"></div>
@@ -770,6 +775,9 @@
     var p=basePayload();
     p.stage='① 診断のみ'; p.name=''; p.tel=''; p.contact_pref=''; p.message='';
     sendToGAS(p);                 // ← この時点でメールを必ず確保
+    // 結果画面の相談フォームに、会社名・メールを引き継いで自動表示
+    document.getElementById('i-company').value = c;
+    document.getElementById('i-email').value = e;
     renderCalendly();
     show('s-result');
   }
@@ -801,7 +809,7 @@
 
   function restart(){
     data = { exp:null, industry:null, jobtype:null, route:null, started_at:null, company:null, email:null };
-    ['g-company','g-email','i-name','i-tel','i-msg'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+    ['g-company','g-email','i-company','i-email','i-name','i-tel','i-msg'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
     document.getElementById('i-contact').value='';
     document.getElementById('g-err').classList.remove('show');
     document.getElementById('f-err').classList.remove('show');
