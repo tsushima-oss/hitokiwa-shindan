@@ -105,6 +105,9 @@
 
   .intro-badge{display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--accent-deep); background:var(--vermilion-soft); padding:7px 16px; border-radius:999px; margin-bottom:16px;}
   .diag h2{font-family:var(--serif); font-weight:800; font-size:28px; line-height:1.5; letter-spacing:.02em; margin:0 0 12px;}
+  /* ゲート見出し：明朝の字詰まり対策（paltオフ＋字間/行間ゆとり） */
+  #s-gate .gate-h{font-family:var(--serif); font-weight:800; font-size:23px; line-height:1.75; letter-spacing:.08em; font-feature-settings:normal; margin:0 0 12px;}
+  #s-gate .gate-h .em{color:var(--accent);}
   .diag .desc{color:var(--muted); font-size:14.5px; line-height:1.95; margin:0 0 24px;}
   .q{font-size:20.5px; font-weight:800; margin:0 0 20px; line-height:1.6; letter-spacing:.02em;}
   .q .qn{font-family:var(--serif); color:var(--accent); font-weight:800; font-size:1.18em; margin-right:9px;}
@@ -413,7 +416,7 @@
     <div class="screen" id="s-gate">
       <div class="guide" style="margin-top:0;"><div class="gch"><img class="m-img" src="assets/chars/megane_happy.png?v=4" alt=""></div><div class="bub"><b>診断結果がまとまりました！</b></div></div>
       <span class="intro-badge">◎ 診断完了</span>
-      <h2 style="font-family:var(--serif);font-weight:800;font-size:24px;line-height:1.5;letter-spacing:.02em;margin:0 0 10px;">結果と、<span style="color:var(--accent)">御社向けの資料</span>を<br>メールでもお届けします</h2>
+      <h2 class="gate-h">結果と、<span class="em">御社向けの資料</span>を<br>メールでもお届けします</h2>
       <p class="desc">この後すぐ、画面に診断結果を表示します。あわせて、御社に合った採用ルートの詳しい資料を記入先へお送りします。<b>登録不要・しつこい営業はしません。</b></p>
       <div class="form" style="margin-top:6px;">
         <div class="field"><label>会社名</label><input id="g-company" type="text" placeholder="例）株式会社ヒトキワ"></div>
@@ -479,7 +482,7 @@
       <div class="celebrate"><img src="assets/chars/megane_fun.png?v=4" alt=""><img src="assets/chars/kensetsu_happy.png?v=4" alt=""></div>
       <div class="check"><span></span></div>
       <h2>お申し込みありがとうございます</h2>
-      <p id="t-msg">担当より1営業日以内に、ご記入の連絡先へご連絡いたします。</p>
+      <p id="t-msg">内容を確認のうえ、担当者より順次ご連絡いたします。</p>
       <p style="font-size:13px; color:var(--soft);">外国人材の採用、定着まで、ヒトキワが伴走します。どうぞよろしくお願いいたします。</p>
     </div>
 
@@ -765,7 +768,7 @@
     err.classList.remove('show');
     data.company=c; data.email=e;
     var p=basePayload();
-    p.stage='① 診断結果（リード）'; p.name=''; p.tel=''; p.contact_pref=''; p.message='';
+    p.stage='① 診断のみ'; p.name=''; p.tel=''; p.contact_pref=''; p.message='';
     sendToGAS(p);                 // ← この時点でメールを必ず確保
     renderCalendly();
     show('s-result');
@@ -778,11 +781,11 @@
     if(!n){ err.classList.add('show'); return; }
     err.classList.remove('show');
     var p=basePayload();
-    p.stage='② 相談・面談希望'; p.name=n; p.tel=val('i-tel');
+    p.stage='② 問い合わせ済み'; p.name=n; p.tel=val('i-tel');
     p.contact_pref=val('i-contact'); p.message=val('i-msg');
     sendToGAS(p);
     document.getElementById('t-msg').textContent =
-      n + '様（' + (data.company||'') + '）、ありがとうございます。担当より1営業日以内に、ご記入の連絡先へご連絡いたします。';
+      n + '様（' + (data.company||'') + '）、ありがとうございます。内容を確認のうえ、担当者より順次ご連絡いたします。';
     show('s-thanks');
   }
 
