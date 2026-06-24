@@ -821,7 +821,7 @@
     if(!n){ err.classList.add('show'); return; }
     err.classList.remove('show');
     var p=basePayload();
-    p.stage='② 問い合わせ済み'; p.name=n; p.tel=val('i-tel');
+    p.stage='② 問い合わせ（診断から）'; p.name=n; p.tel=val('i-tel');
     p.contact_pref=val('i-contact'); p.message=val('i-msg');
     sendToGAS(p);
     document.getElementById('t-msg').textContent =
@@ -847,8 +847,7 @@
     err.classList.remove('show');
     data.company=c; data.email=e;
     var p=basePayload();
-    p.source='メール経由のお問い合わせ';
-    p.stage='② 問い合わせ済み';
+    p.stage='③ 問い合わせ（メールから）';
     p.name=n; p.tel=val('c-tel'); p.contact_pref=val('c-contact'); p.message=val('c-msg');
     sendToGAS(p);
     document.getElementById('t-msg').textContent =
