@@ -409,6 +409,22 @@
       <div class="back"><button class="btn-ghost" onclick="show('s-q2')">‹ 戻る</button></div>
     </div>
 
+    <!-- ゲート（修正案1）：結果を見せる前に会社名・メールを取得＝リードを取りこぼさない -->
+    <div class="screen" id="s-gate">
+      <div class="guide" style="margin-top:0;"><div class="gch"><img class="m-img" src="assets/chars/megane_happy.png?v=4" alt=""></div><div class="bub"><b>診断結果がまとまりました！</b></div></div>
+      <span class="intro-badge">◎ 診断完了</span>
+      <h2 style="font-family:var(--serif);font-weight:800;font-size:24px;line-height:1.5;letter-spacing:.02em;margin:0 0 10px;">結果と、<span style="color:var(--accent)">御社向けの資料</span>を<br>メールでもお届けします</h2>
+      <p class="desc">この後すぐ、画面に診断結果を表示します。あわせて、御社に合った採用ルートの詳しい資料を記入先へお送りします。<b>登録不要・しつこい営業はしません。</b></p>
+      <div class="form" style="margin-top:6px;">
+        <div class="field"><label>会社名</label><input id="g-company" type="text" placeholder="例）株式会社ヒトキワ"></div>
+        <div class="field"><label>メールアドレス</label><input id="g-email" type="email" placeholder="例）info@example.co.jp"></div>
+        <div class="err" id="g-err">会社名・メールアドレスをご入力ください。</div>
+        <button class="btn btn-primary btn-full" onclick="submitGate()">結果を見る（<span class="hl">無料</span>）</button>
+        <p class="privacy">ご入力情報は、診断結果の送付・ご相談対応のみに利用します。</p>
+      </div>
+      <div class="back"><button class="btn-ghost" onclick="show('s-q3')">‹ 戻る</button></div>
+    </div>
+
     <!-- 結果 -->
     <div class="screen" id="s-result">
       <!-- 祝福（楽）：結果が出た喜びを演出 -->
@@ -426,31 +442,33 @@
       <div class="pool" id="r-pool"></div>
       <p class="tnote">※ 上記は登録人材のイメージです。実際のご紹介可能な人材は、ご相談時に最新の情報をご案内します。</p>
 
-      <!-- お問い合わせ：診断結果つきで送信 -->
+      <!-- 同業の導入事例（修正案3）：不安解消→相談動機の喚起 -->
+      <div class="sectit">同業の「採用できた」事例を見る <img class="sch m-img" src="assets/chars/kensetsu_happy.png?v=4" alt=""></div>
+      <div class="cases-grid" id="r-cases"></div>
+      <p class="tnote">※ ヒトキワ公式note（自社メディア）の事例です。ほかにも多数あります。</p>
+
+      <!-- 面談・具体相談フォーム（修正案2）：メールは取得済なので“予約・相談”に特化 -->
       <div class="form">
-        <h3 id="f-title">この内容で、無料相談を申し込む</h3>
-        <p class="fdesc">診断結果をもとに、御社に合った採用プランと、紹介できる人材の具体例を担当よりご案内します。<b>採用するかどうかは、話を聞いてから決めて大丈夫です。</b></p>
+        <h3 id="f-title">無料オンライン相談・面談を申し込む</h3>
+        <p class="fdesc">診断結果をもとに、御社専任の担当が最適な採用プラン・紹介できる人材・費用感までご案内します。<b>その場で採用を決める必要はありません。</b></p>
+        <div id="r-calendly"></div>
         <div class="two">
-          <div class="field"><label>会社名</label><input id="i-company" type="text" placeholder="例）株式会社ヒトキワ"></div>
           <div class="field"><label>お名前</label><input id="i-name" type="text" placeholder="例）山田 太郎"></div>
-        </div>
-        <div class="two">
-          <div class="field"><label>メールアドレス</label><input id="i-email" type="email" placeholder="例）info@example.co.jp"></div>
           <div class="field"><label>電話番号 <span class="opt-tag">（任意）</span></label><input id="i-tel" type="tel" placeholder="例）03-0000-0000"></div>
         </div>
         <div class="field">
-          <label>ご希望の連絡方法 <span class="opt-tag">（任意）</span></label>
+          <label>ご希望の進め方 <span class="opt-tag">（任意）</span></label>
           <select id="i-contact">
             <option value="">どちらでも</option>
-            <option value="電話">電話で話したい</option>
-            <option value="メール">まずはメールで資料がほしい</option>
             <option value="オンライン面談">オンラインで面談したい</option>
+            <option value="電話">電話で話したい</option>
+            <option value="メールで資料">まずはメールで資料がほしい</option>
           </select>
         </div>
-        <div class="field"><label>ご相談内容・ご質問 <span class="opt-tag">（任意）</span></label><textarea id="i-msg" placeholder="例）製造ラインの人手が足りず、3名ほど採用を検討しています。"></textarea></div>
-        <div class="err" id="f-err">会社名・お名前・メールアドレスをご入力ください。</div>
-        <button class="btn btn-primary btn-full" onclick="submitForm()">この内容で相談を申し込む</button>
-        <p class="privacy">送信いただいた情報は、ご相談対応の目的にのみ利用します。しつこい勧誘は行いません。</p>
+        <div class="field"><label>ご相談内容・ご希望日時 <span class="opt-tag">（任意）</span></label><textarea id="i-msg" placeholder="例）来週の午後にオンラインで。製造ラインで3名ほど検討中です。"></textarea></div>
+        <div class="err" id="f-err">お名前をご入力ください。</div>
+        <button class="btn btn-primary btn-full" onclick="submitForm()">この内容で相談・面談を申し込む</button>
+        <p class="privacy">メールアドレスは前の画面で受付済みです。日程調整ツール（Calendly等）の連携も可能です。</p>
       </div>
 
       <div class="back" style="text-align:center;"><button class="btn-ghost" onclick="restart()">↺ もう一度診断する</button></div>
@@ -521,7 +539,9 @@
     //    設定手順は「gas-hitokiwa-shindan/SETUP.md」を参照。未設定（空のまま）でも画面はデモとして動作します。
     GAS_URL: "https://script.google.com/macros/s/AKfycbx9jm3KwVnmt02pyJNHYr6wWz_vP-g7dSmz1gSUsa8rBe_HoFs0CIIzWTHB2BACsaOD/exec",
     // 入口の既定の識別名。URLに広告パラメータ（?utm_campaign=... や ?ad=...）が付いていれば、そちらを優先します。
-    SOURCE: "外国人採用適性診断"
+    SOURCE: "外国人採用適性診断",
+    // ↓ Calendly等の予約ページURLを入れると、結果画面に予約カレンダーが埋め込まれます（空なら相談フォームを表示）。
+    CALENDLY_URL: ""
   };
 
   /* ====== 広告ひも付け（アド・アトリビューション） ======
@@ -552,7 +572,7 @@
   // 広告名（ad / utm_campaign）があれば、入口の識別名をその広告名で上書き（A/B比較しやすく）
   var ENTRY_SOURCE = AD.ad || AD.utm_campaign || CONFIG.SOURCE;
 
-  var data = { exp:null, industry:null, jobtype:null, route:null, started_at:null };
+  var data = { exp:null, industry:null, jobtype:null, route:null, started_at:null, company:null, email:null };
 
   /* ====== 業種別：紹介できる求職者プロフィール（イメージ／デモ用） ======
      ※実データではなく、見せ方の雛形です。実運用では登録人材データと差し替え可能です。 */
@@ -674,7 +694,34 @@
     document.getElementById('r-pool').innerHTML =
       '<span class="num">'+(POOL[ind]||'多数')+'</span><span>の'+labelIndustry(ind)+'人材が、いま就業先を探しています</span>';
 
-    show('s-result');
+    renderCases(ind);     // 同業の導入事例（修正案3）
+    show('s-gate');       // 結果を見せる前に、まず会社名＋メールを取得（修正案1）
+  }
+
+  /* ====== 同業の導入事例（noteの実記事カバー） ====== */
+  var CASE_ALL = {
+    daihyo:{img:'note_daihyo', t:'代表インタビュー｜才能の架け橋を世界に', u:'https://note.com/_hitokiwa/n/n11fdc7b58dbe'},
+    kaigo:{img:'note_kaigo', t:'活用事例｜介護・医療業界', u:'https://note.com/_hitokiwa/n/n4f3fa0d243b0'},
+    kensetsu:{img:'note_kensetsu', t:'活用事例｜建設業界（技術継承）', u:'https://note.com/_hitokiwa/n/ne36aff0e7bd3'},
+    yogashi:{img:'note_yogashi', t:'活用事例｜洋菓子メーカー', u:'https://note.com/_hitokiwa/n/nd9392504b9a5'},
+    chuka:{img:'note_chuka', t:'活用事例｜中華料理店（紹介料0円）', u:'https://note.com/_hitokiwa/n/n171047691842'},
+    zoen:{img:'note_zoen', t:'活用事例｜造園業', u:'https://note.com/_hitokiwa/n/n320feed34548'}
+  };
+  // 業種に合わせて、関連する事例を先頭に（同業の事例を見せて不安を解消）
+  var CASE_BY_IND = {
+    "介護":['kaigo','daihyo','chuka'], "建設":['kensetsu','daihyo','zoen'],
+    "製造":['yogashi','kensetsu','daihyo'], "農業":['zoen','kensetsu','daihyo'],
+    "飲食":['chuka','yogashi','daihyo'], "宿泊":['chuka','daihyo','kensetsu'],
+    "専門事務":['daihyo','kaigo','chuka'], "その他":['daihyo','chuka','kensetsu']
+  };
+  function renderCases(ind){
+    var keys = CASE_BY_IND[ind] || CASE_BY_IND['その他'];
+    document.getElementById('r-cases').innerHTML = keys.map(function(k){
+      var c = CASE_ALL[k]; if(!c) return '';
+      return '<a class="case" href="'+c.u+'" target="_blank" rel="noopener">'
+        + '<img src="assets/note/'+c.img+'.jpg" alt="'+c.t+'" loading="lazy">'
+        + '<span class="case-t">'+c.t+'</span></a>';
+    }).join('');
   }
 
   function labelIndustry(ind){
@@ -682,63 +729,78 @@
     return m[ind]||"";
   }
 
-  /* ====== 送信 ====== */
-  function submitForm(){
-    var c=val('i-company'), n=val('i-name'), e=val('i-email');
-    var err=document.getElementById('f-err');
-    if(!c || !n || !e || e.indexOf('@')<1){ err.classList.add('show'); return; }
-    err.classList.remove('show');
+  function val(id){ return (document.getElementById(id).value||'').trim(); }
 
-    var payload = {
-      source: ENTRY_SOURCE,                 // 入口識別（広告名があれば広告名）
+  /* ====== 送信（共通） ====== */
+  function basePayload(){
+    return {
+      source: ENTRY_SOURCE,
       timestamp: new Date().toISOString(),
       started_at: data.started_at,
-      company: c, name: n, email: e,
-      tel: val('i-tel'),
-      contact_pref: val('i-contact'),
-      message: val('i-msg'),
-      q1_exp: data.exp,
-      q2_industry: data.industry,
-      q3_jobtype: data.jobtype,
-      result_route: data.route,
-      page_url: location.href,
-      // ▼ 広告ひも付け情報（どの広告・キャンペーンから来たか）
-      ad_campaign: AD.utm_campaign || AD.ad || '',
-      ad_source: AD.utm_source || '',
-      ad_medium: AD.utm_medium || '',
-      ad_content: AD.utm_content || '',
-      ad_term: AD.utm_term || '',
-      gclid: AD.gclid || '',
-      fbclid: AD.fbclid || '',
-      referrer: AD.referrer || '',
-      ad_first_seen: AD.first_seen || ''
+      company: data.company || '', email: data.email || '',
+      q1_exp: data.exp, q2_industry: data.industry, q3_jobtype: data.jobtype,
+      result_route: data.route, page_url: location.href,
+      ad_campaign: AD.utm_campaign || AD.ad || '', ad_source: AD.utm_source || '',
+      ad_medium: AD.utm_medium || '', ad_content: AD.utm_content || '', ad_term: AD.utm_term || '',
+      gclid: AD.gclid || '', fbclid: AD.fbclid || '',
+      referrer: AD.referrer || '', ad_first_seen: AD.first_seen || ''
     };
-
-    // GAS_URL が設定されていれば、スプレッドシートへ自動保存＋営業へメール通知。
+  }
+  function sendToGAS(payload){
     if(CONFIG.GAS_URL){
       try{
-        fetch(CONFIG.GAS_URL, {
-          method:'POST', mode:'no-cors',
-          headers:{'Content-Type':'text/plain;charset=utf-8'},
-          body: JSON.stringify(payload)
-        });
-      }catch(_){ /* 送信失敗でも画面は完了に進める（取りこぼし防止） */ }
+        fetch(CONFIG.GAS_URL, {method:'POST', mode:'no-cors',
+          headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload)});
+      }catch(_){ /* 送信失敗でも画面は進める（取りこぼし防止） */ }
     } else {
-      // 未設定時：開発確認用にコンソールへ出力（運用では上のGAS送信が動きます）
-      console.log('[診断フォーム] 送信内容（GAS_URL未設定のためコンソール出力）', payload);
+      console.log('[診断フォーム] 送信内容（GAS_URL未設定）', payload);
     }
+  }
 
+  /* ① ゲート送信：結果の前に会社名＋メールを取得＝リード確保（修正案1） */
+  function submitGate(){
+    var c=val('g-company'), e=val('g-email');
+    var err=document.getElementById('g-err');
+    if(!c || e.indexOf('@')<1){ err.classList.add('show'); return; }
+    err.classList.remove('show');
+    data.company=c; data.email=e;
+    var p=basePayload();
+    p.stage='① 診断結果（リード）'; p.name=''; p.tel=''; p.contact_pref=''; p.message='';
+    sendToGAS(p);                 // ← この時点でメールを必ず確保
+    renderCalendly();
+    show('s-result');
+  }
+
+  /* ② 面談・相談送信：熱量の高いユーザーの商談化（修正案2） */
+  function submitForm(){
+    var n=val('i-name');
+    var err=document.getElementById('f-err');
+    if(!n){ err.classList.add('show'); return; }
+    err.classList.remove('show');
+    var p=basePayload();
+    p.stage='② 相談・面談希望'; p.name=n; p.tel=val('i-tel');
+    p.contact_pref=val('i-contact'); p.message=val('i-msg');
+    sendToGAS(p);
     document.getElementById('t-msg').textContent =
-      n + '様（' + c + '）、ありがとうございます。担当より1営業日以内に、ご記入の連絡先へご連絡いたします。';
+      n + '様（' + (data.company||'') + '）、ありがとうございます。担当より1営業日以内に、ご記入の連絡先へご連絡いたします。';
     show('s-thanks');
   }
 
-  function val(id){ return (document.getElementById(id).value||'').trim(); }
+  /* Calendly等の予約ページを結果画面に埋め込む（CONFIG.CALENDLY_URL設定時のみ） */
+  function renderCalendly(){
+    var box=document.getElementById('r-calendly'); if(!box) return;
+    if(CONFIG.CALENDLY_URL){
+      box.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--accent-deep);margin:0 0 8px;">▼ 空き枠から面談を予約できます</div>'
+        +'<iframe src="'+CONFIG.CALENDLY_URL+'" style="width:100%;height:560px;border:1px solid var(--line);border-radius:12px;" loading="lazy"></iframe>'
+        +'<div style="text-align:center;color:var(--soft);font-size:12px;margin:10px 0;">― または、下のフォームからでもOK ―</div>';
+    } else { box.innerHTML=''; }
+  }
 
   function restart(){
-    data = { exp:null, industry:null, jobtype:null, route:null, started_at:null };
-    ['i-company','i-name','i-email','i-tel','i-msg'].forEach(function(id){ document.getElementById(id).value=''; });
+    data = { exp:null, industry:null, jobtype:null, route:null, started_at:null, company:null, email:null };
+    ['g-company','g-email','i-name','i-tel','i-msg'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
     document.getElementById('i-contact').value='';
+    document.getElementById('g-err').classList.remove('show');
     document.getElementById('f-err').classList.remove('show');
     show('s-intro');
   }
