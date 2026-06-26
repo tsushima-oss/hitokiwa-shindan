@@ -872,6 +872,11 @@
         var co=q.get('company'), em=q.get('email');
         if(co) document.getElementById('c-company').value=co;
         if(em) document.getElementById('c-email').value=em;
+        // 診断結果を引き継ぐ（メールのリンクから来た場合）
+        if(q.get('route')) data.route=q.get('route');
+        if(q.get('q1')) data.exp=q.get('q1');
+        if(q.get('q2')) data.industry=q.get('q2');
+        if(q.get('q3')) data.jobtype=q.get('q3');
         show('s-contact');
       }
     }catch(_){}
