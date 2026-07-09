@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MGK4F63H');</script>
+<!-- End Google Tag Manager -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>30秒 外国人採用 適性診断｜ヒトキワ</title>
@@ -335,6 +342,10 @@
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MGK4F63H"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <div class="bar">
   <!-- ヒトキワ公式ロゴ（hito-kiwa.co.jp の logo.svg をインライン化。色は currentColor で可変） -->
@@ -788,13 +799,21 @@
   }
   function sendToGAS(payload){
     if(CONFIG.GAS_URL){
-      try{
-        fetch(CONFIG.GAS_URL, {method:'POST', mode:'no-cors',
-          headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload)});
-      }catch(_){ /* 送信失敗でも画面は進める（取りこぼし防止） */ }
-    } else {
-      console.log('[診断フォーム] 送信内容（GAS_URL未設定）', payload);
+      // 送信結果をPromiseで返す（成功=resolve／通信エラー=reject）
+      return fetch(CONFIG.GAS_URL, {method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload)});
     }
+    console.log('[診断フォーム] 送信内容（GAS_URL未設定）', payload);
+    return Promise.resolve();
+  }
+
+  /* CV計測：ゲート（会社名＋メール→結果を見る）の送信成功時に1回だけ diagnosis_lead_complete を発火 */
+  var __leadCVFired=false;
+  function fireLeadCV(){
+    if(__leadCVFired) return;
+    __leadCVFired=true;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'diagnosis_lead_complete' });
   }
 
   /* ① ゲート送信：結果の前に会社名＋メールを取得＝リード確保（修正案1） */
@@ -806,7 +825,8 @@
     data.company=c; data.email=e;
     var p=basePayload();
     p.stage='① 診断のみ'; p.name=''; p.tel=''; p.contact_pref=''; p.message='';
-    sendToGAS(p);                 // ← この時点でメールを必ず確保
+    // 送信が正常に完了したときだけCVイベントを発火（入力エラーは手前でreturn／通信エラーはcatchで発火せず）
+    sendToGAS(p).then(function(){ fireLeadCV(); }).catch(function(){ /* 送信失敗：CVは発火しない */ });
     // 結果画面の相談フォームに、会社名・メールを引き継いで自動表示
     document.getElementById('i-company').value = c;
     document.getElementById('i-email').value = e;
@@ -857,6 +877,7 @@
 
   function restart(){
     data = { exp:null, industry:null, jobtype:null, route:null, started_at:null, company:null, email:null };
+    __leadCVFired=false;
     ['g-company','g-email','i-company','i-email','i-name','i-tel','i-msg','c-company','c-name','c-email','c-tel','c-msg'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
     document.getElementById('i-contact').value='';
     document.getElementById('c-contact').value='';
