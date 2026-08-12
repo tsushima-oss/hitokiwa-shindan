@@ -134,6 +134,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .btn .hl{color:#ffd54a; font-weight:900;}  /* バナーの黄色アクセント（無料） */
   .btn-primary:hover{background:var(--accent-deep); transform:translateY(-1px);}
   .btn-full{width:100%;}
+  /* 2行構成のCTAボタン（メイン＋所要時間） */
+  .btn-stack{flex-direction:column; gap:3px; line-height:1.35; padding-top:15px; padding-bottom:15px;}
+  .btn-stack .cta-main{font-size:1.06em; font-weight:900; letter-spacing:.05em;}
+  .btn-stack .cta-sub{font-size:.74em; font-weight:800; letter-spacing:.04em; color:#ffe08a;}
+  .btn-stack .cta-sub b{color:#ffd54a; font-weight:900;}
   .btn-ghost{background:transparent; color:var(--muted); font-weight:500; font-size:14px; padding:8px 4px; border:none; cursor:pointer; font-family:inherit;}
   .btn-ghost:hover{color:var(--accent);}
   .back{margin-top:18px;}
@@ -278,19 +283,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .bar{padding:12px 16px;}
     .bar .hk-logo{height:22px;}
 
-    .hero{padding:34px 0 4px;}
+    .hero{padding:12px 0 2px;}
     .hero .kick{font-size:11.5px; letter-spacing:.04em; padding:8px 16px; margin-bottom:16px;}
-    .hero h1{font-size:28px; line-height:1.5; letter-spacing:.01em; margin:0 0 14px;}
+    .hero h1{font-size:27px; line-height:1.4; letter-spacing:.01em; margin:0 0 8px;}
     .hero p{font-size:14px; line-height:1.85;}
     .hero p br{display:none;}            /* 狭い画面では自然な折り返しに任せる */
-    .hero .punch{font-size:17.5px; margin-top:15px;}
+    .hero .punch{font-size:17.5px; margin-top:10px;}
     .trust{gap:7px; margin-top:18px;}
     .trust .chip{font-size:11.5px; padding:6px 11px;}
 
-    .diag{padding:24px 17px 26px; border-radius:15px; margin-top:22px;}
-    .diag h2{font-size:23px; line-height:1.48;}
+    .diag{padding:16px 16px 24px; border-radius:15px; margin-top:8px;}
+    .diag h2{font-size:18px; line-height:1.55; letter-spacing:0; margin:0 0 10px;}
     .diag .desc{font-size:13.5px;}
-    .intro-badge{font-size:12px; padding:6px 13px;}
+    .intro-badge{font-size:12px; padding:6px 13px; margin-bottom:10px;}
+    /* スマホは「診断をはじめる」ボタンをスクロールなしで見せるため、TOPの詳細説明は非表示（PCでは表示） */
+    #s-intro .desc{display:none;}
 
     .q{font-size:18px; line-height:1.6; margin-bottom:16px;}
     .opt{padding:13px 14px; font-size:14.5px; gap:10px;}
@@ -318,7 +325,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .thanks p{font-size:13.5px;}
     .disc{font-size:11px;}
     /* キャラクター（スマホ）＝高さで統一 */
-    .guide{gap:12px; margin:16px 0 4px;}
+    .guide{gap:12px; margin:10px 0 4px;}
     .guide .gch img{height:74px;}
     .guide .bub{font-size:13px; padding:10px 13px;}
     .celebrate img{height:76px;}
@@ -357,15 +364,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- ヒーロー：「無料紹介」フックではなく「全面相談・伴走」の打ち出し -->
   <div class="hero">
-    <span class="kick">はじめての外国人採用も、まずは簡易チェック</span>
-    <h1>会社に合う採用のかたちを<br><span class="em">30秒で診断</span></h1>
-    <p>「人手が足りない。外国人採用も気になる。<br>でも、特定技能・技人国・ビザの違いがよくわからない」——そんな御社へ。</p>
-    <p class="punch"><b>30秒・3つの質問</b>に答えるだけ！<span class="sub">御社に合った採用ルートと、いま紹介できる人材イメージがわかります。</span></p>
-    <div class="trust">
-      <span class="chip">✓ 完全<b>無料</b>・登録不要</span>
-      <span class="chip">✓ 入力は<b>30秒</b></span>
-      <span class="chip">✓ しつこい営業はしません</span>
-    </div>
+    <span class="kick">外国人採用をお考えの企業さまへ</span>
+    <h1>あなたの会社に合う<br>外国人採用の進め方を<br><span class="em">30秒で診断</span></h1>
+    <p class="punch"><b>3つの質問</b>に答えるだけ！</p>
     <!-- ヒーロー左右の覗きキャラ（広い画面のみ）：哀＝悩み共感／頼れる＝おまかせ -->
     <div class="hero-peek left"><span class="pb worry">違いがわからない…</span><img class="m-img" src="assets/chars/inshoku_sad.png?v=4" alt=""></div>
     <div class="hero-peek right"><span class="pb">制度はおまかせ！</span><img class="m-img" src="assets/chars/megane_fun.png?v=4" alt=""></div>
@@ -376,11 +377,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- イントロ -->
     <div class="screen active" id="s-intro">
       <span class="intro-badge">◎ 採用ルート診断</span>
-      <h2>あなたの会社に合う<br>外国人採用のかたちを診断します</h2>
+      <h2>あなたの会社に合った<br>外国人材の採用ルートがわかります</h2>
       <p class="desc">外国人採用には「特定技能」「技人国（技術・人文知識・国際業務）」など複数のルートがあり、業種や求める働き方で最適解が変わります。さらに2026年の制度改正で、企業の<b>カテゴリー区分</b>によって手続きの難易度も変わりました。まずは3問でチェックしましょう。</p>
       <!-- 案内役（喜）：診断スタートへ誘導 -->
-      <div class="guide"><div class="gch"><img class="m-img" src="assets/chars/megane_happy.png?v=4" alt="案内役キャラクター"></div><div class="bub">外国人採用、何から始める？<br><b>まず30秒でチェック！</b></div></div>
-      <button class="btn btn-primary btn-full" onclick="start()">診断をはじめる（<span class="hl">無料</span>・30秒）</button>
+      <div class="guide"><div class="gch"><img class="m-img" src="assets/chars/megane_happy.png?v=4" alt="案内役キャラクター"></div><div class="bub">外国人採用、何から始める？<br><b>まずは3つの質問でチェック！</b></div></div>
+      <button class="btn btn-primary btn-full btn-stack" onclick="start()"><span class="cta-main">無料で診断をはじめる</span><span class="cta-sub">所要時間：<b>約30秒</b></span></button>
     </div>
 
     <!-- Q1：採用経験（兼松様：人材不足で外国人採用をやったことあるか） -->
