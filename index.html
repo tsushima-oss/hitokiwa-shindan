@@ -139,6 +139,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .btn-stack .cta-main{font-size:1.06em; font-weight:900; letter-spacing:.05em;}
   .btn-stack .cta-sub{font-size:.74em; font-weight:800; letter-spacing:.04em; color:#ffe08a;}
   .btn-stack .cta-sub b{color:#ffd54a; font-weight:900;}
+  /* 結果画面のCTA（予約／電話） */
+  .cta-actions{margin-top:26px; padding-top:24px; border-top:1px dashed var(--line);}
+  .cta-h{font-family:var(--serif); font-weight:800; font-size:22px; line-height:1.5; text-align:center; margin:0 0 8px;}
+  .cta-d{font-size:14px; color:var(--muted); line-height:1.9; text-align:center; margin:0 auto 18px; max-width:520px;}
+  .cta-actions .btn{margin-bottom:12px;}
+  a.btn{text-decoration:none;}
+  .btn-tel{background:#fff; color:var(--accent-deep); border:2px solid var(--accent);}
+  .btn-tel:hover{background:var(--vermilion-soft);}
+  .btn-tel .cta-main{color:var(--accent-deep);}
+  .btn-tel .cta-sub{color:var(--accent);}
+  .tx-embed{margin-top:6px; border:1px solid var(--line); border-radius:14px; padding:14px; background:#fff;}
+  .tx-embed .tx-h{font-size:13px; font-weight:700; color:var(--accent-deep); margin:0 0 10px;}
+  #timerex_calendar{min-height:520px;}
   .btn-ghost{background:transparent; color:var(--muted); font-weight:500; font-size:14px; padding:8px 4px; border:none; cursor:pointer; font-family:inherit;}
   .btn-ghost:hover{color:var(--accent);}
   .back{margin-top:18px;}
@@ -425,22 +438,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="back"><button class="btn-ghost" onclick="show('s-q2')">‹ 戻る</button></div>
     </div>
 
-    <!-- ゲート（修正案1）：結果を見せる前に会社名・メールを取得＝リードを取りこぼさない -->
-    <div class="screen" id="s-gate">
-      <div class="guide" style="margin-top:0;"><div class="gch"><img class="m-img" src="assets/chars/megane_happy.png?v=4" alt=""></div><div class="bub"><b>診断結果がまとまりました！</b></div></div>
-      <span class="intro-badge">◎ 診断完了</span>
-      <h2 class="gate-h">結果と、<span class="em">御社向けの資料</span>を<br>メールでもお届けします</h2>
-      <p class="desc">この後すぐ、画面に診断結果を表示します。あわせて、御社に合った採用ルートの詳しい資料を記入先へお送りします。<b>登録不要・しつこい営業はしません。</b></p>
-      <div class="form" style="margin-top:6px;">
-        <div class="field"><label>会社名</label><input id="g-company" type="text" placeholder="例）株式会社ヒトキワ"></div>
-        <div class="field"><label>メールアドレス</label><input id="g-email" type="email" placeholder="例）info@example.co.jp"></div>
-        <div class="err" id="g-err">会社名・メールアドレスをご入力ください。</div>
-        <button class="btn btn-primary btn-full" onclick="submitGate()">結果を見る（<span class="hl">無料</span>）</button>
-        <p class="privacy">ご入力情報は、診断結果の送付・ご相談対応のみに利用します。</p>
-      </div>
-      <div class="back"><button class="btn-ghost" onclick="show('s-q3')">‹ 戻る</button></div>
-    </div>
-
     <!-- 結果 -->
     <div class="screen" id="s-result">
       <!-- 祝福（楽）：結果が出た喜びを演出 -->
@@ -452,46 +449,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <div id="r-route"></div>
 
-      <!-- 「こういう人材が紹介できます」＝求職者イメージ（兼松様ご要望） -->
+      <!-- ② 相談導線：予約（TimeRex埋め込み）／電話発信 -->
+      <div class="cta-actions">
+        <h3 class="cta-h">診断結果について、<br>直接お話ししませんか？</h3>
+        <p class="cta-d">御社に合った採用ルート・ご紹介できる人材・費用感まで、専任担当がご案内します。<b>その場で採用を決める必要はありません。</b></p>
+        <button class="btn btn-primary btn-full btn-stack" onclick="openBooking()"><span class="cta-main">予約して話を聞きたい</span><span class="cta-sub">オンラインで日程を選ぶ（かんたん）</span></button>
+        <a class="btn btn-tel btn-full btn-stack" href="tel:0368422937" onclick="onCallClick()"><span class="cta-main">📞 電話をかける</span><span class="cta-sub" id="tel-sub">03-6842-2937（受付時間内）</span></a>
+
+        <!-- TimeRex 埋め込み（「予約して話を聞きたい」で表示） -->
+        <div id="tx-embed" class="tx-embed" style="display:none;">
+          <div class="tx-h">▼ ご希望の日時をお選びください</div>
+          <div id="timerex_calendar" data-url="https://timerex.net/s/komine_378b_be09/f48d8040"></div>
+        </div>
+        <script id="timerex_embed" src="https://asset.timerex.net/js/embed.js"></script>
+      </div>
+
+      <!-- ③ 「こういう人材が紹介できます」＝求職者イメージ -->
       <div class="sectit">いま、こういう人材を紹介できます <img class="sch m-img" src="assets/chars/inshoku_happy.png?v=4" alt=""></div>
       <div class="talent" id="r-talent"></div>
       <div class="pool" id="r-pool"></div>
       <p class="tnote">※ 上記は登録人材のイメージです。実際のご紹介可能な人材は、ご相談時に最新の情報をご案内します。</p>
-
-      <!-- 同業の導入事例（修正案3）：不安解消→相談動機の喚起 -->
-      <div class="sectit">同業の「採用できた」事例を見る <img class="sch m-img" src="assets/chars/kensetsu_happy.png?v=4" alt=""></div>
-      <div class="cases-grid" id="r-cases"></div>
-      <p class="tnote">※ ヒトキワ公式note（自社メディア）の事例です。ほかにも多数あります。</p>
-
-      <!-- 面談・具体相談フォーム（修正案2）：メールは取得済なので“予約・相談”に特化 -->
-      <div class="form">
-        <h3 id="f-title">無料オンライン相談・面談を申し込む</h3>
-        <p class="fdesc">診断結果をもとに、御社専任の担当が最適な採用プラン・紹介できる人材・費用感までご案内します。<b>その場で採用を決める必要はありません。</b></p>
-        <div id="r-calendly"></div>
-        <div class="two">
-          <div class="field"><label>会社名 <span class="opt-tag">（入力済み）</span></label><input id="i-company" type="text" readonly></div>
-          <div class="field"><label>メールアドレス <span class="opt-tag">（入力済み）</span></label><input id="i-email" type="email" readonly></div>
-        </div>
-        <div class="two">
-          <div class="field"><label>お名前</label><input id="i-name" type="text" placeholder="例）山田 太郎"></div>
-          <div class="field"><label>電話番号 <span class="opt-tag">（任意）</span></label><input id="i-tel" type="tel" placeholder="例）03-0000-0000"></div>
-        </div>
-        <div class="field">
-          <label>ご希望の進め方 <span class="opt-tag">（任意）</span></label>
-          <select id="i-contact">
-            <option value="どちらでも">どちらでも</option>
-            <option value="オンラインで面談したい">オンラインで面談したい</option>
-            <option value="電話で話したい">電話で話したい</option>
-            <option value="メールで資料がほしい">メールで資料がほしい</option>
-          </select>
-        </div>
-        <div class="field"><label>ご相談内容・ご希望日時 <span class="opt-tag">（任意）</span></label><textarea id="i-msg" placeholder="例）来週の午後にオンラインで。製造ラインで3名ほど検討中です。"></textarea></div>
-        <div class="err" id="f-err">お名前をご入力ください。</div>
-        <button class="btn btn-primary btn-full" onclick="submitForm()">この内容で相談・面談を申し込む</button>
-        <p class="privacy">メールアドレスは前の画面で受付済みです。日程調整ツール（Calendly等）の連携も可能です。</p>
-      </div>
-
-      <div class="back" style="text-align:center;"><button class="btn-ghost" onclick="restart()">↺ もう一度診断する</button></div>
     </div>
 
     <!-- 単独のお問い合わせ画面（メールの導線などから ?contact=1 で開く） -->
@@ -592,8 +569,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     GAS_URL: "https://script.google.com/macros/s/AKfycbx9jm3KwVnmt02pyJNHYr6wWz_vP-g7dSmz1gSUsa8rBe_HoFs0CIIzWTHB2BACsaOD/exec",
     // 入口の既定の識別名。URLに広告パラメータ（?utm_campaign=... や ?ad=...）が付いていれば、そちらを優先します。
     SOURCE: "外国人採用適性診断",
-    // ↓ Calendly等の予約ページURLを入れると、結果画面に予約カレンダーが埋め込まれます（空なら相談フォームを表示）。
-    CALENDLY_URL: ""
+    // ↓ Calendly等の予約ページURL（旧方式。現在はTimeRexを使用）。
+    CALENDLY_URL: "",
+    // TimeRex（日程調整）の予約ページURL。結果画面の「予約して話を聞きたい」で埋め込み表示。
+    TIMEREX_URL: "https://timerex.net/s/komine_378b_be09/f48d8040",
+    // 「電話をかける」ボタンの発信先。
+    TEL: "03-6842-2937"
   };
 
   /* ====== 広告ひも付け（アド・アトリビューション） ======
@@ -746,8 +727,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.getElementById('r-pool').innerHTML =
       '<span class="num">'+(POOL[ind]||'多数')+'</span><span>の'+labelIndustry(ind)+'人材が、いま就業先を探しています</span>';
 
-    renderCases(ind);     // 同業の導入事例（修正案3）
-    show('s-gate');       // 結果を見せる前に、まず会社名＋メールを取得（修正案1）
+    __bookingSaved=false;                    // 再診断に備えてリセット
+    var box=document.getElementById('tx-embed'); if(box) box.style.display='none';
+    show('s-result');     // 診断結果をその場で表示（ゲート廃止）
   }
 
   /* ====== 同業の導入事例（noteの実記事カバー） ====== */
@@ -817,47 +799,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     window.dataLayer.push({ event: 'diagnosis_lead_complete' });
   }
 
-  /* ① ゲート送信：結果の前に会社名＋メールを取得＝リード確保（修正案1） */
-  function submitGate(){
-    var c=val('g-company'), e=val('g-email');
-    var err=document.getElementById('g-err');
-    if(!c || e.indexOf('@')<1){ err.classList.add('show'); return; }
-    err.classList.remove('show');
-    data.company=c; data.email=e;
-    var p=basePayload();
-    p.stage='① 診断のみ'; p.name=''; p.tel=''; p.contact_pref=''; p.message='';
-    // 送信が正常に完了したときだけCVイベントを発火（入力エラーは手前でreturn／通信エラーはcatchで発火せず）
-    sendToGAS(p).then(function(){ fireLeadCV(); }).catch(function(){ /* 送信失敗：CVは発火しない */ });
-    // 結果画面の相談フォームに、会社名・メールを引き継いで自動表示
-    document.getElementById('i-company').value = c;
-    document.getElementById('i-email').value = e;
-    renderCalendly();
-    show('s-result');
+  /* ====== 予約（TimeRex）／電話 の導線 ====== */
+  var ROUTE_JA = { field:'特定技能ルート', pro:'技人国ルート', cat:'カテゴリー対策ルート', consult:'まず相談' };
+  var __txInit=false;       // TimeRexウィジェット初期化済みフラグ
+  var __bookingSaved=false; // 予約完了の保存済みフラグ
+
+  /* 「予約して話を聞きたい」→ TimeRexウィジェットを表示（初回のみ初期化） */
+  function openBooking(){
+    var box=document.getElementById('tx-embed');
+    if(box) box.style.display='block';
+    if(!__txInit && typeof TimerexCalendar === 'function'){
+      __txInit=true;
+      var comment='【診断結果】'+ (ROUTE_JA[data.route]||'') +'／業種:'+(data.industry||'')+'（診断フォームより）';
+      TimerexCalendar({
+        guest_comment: comment,
+        locale: 'ja',
+        url_params: {
+          shindan_result: encodeURIComponent(data.route||''),
+          q1: encodeURIComponent(data.exp||''),
+          q2: encodeURIComponent(data.industry||''),
+          q3: encodeURIComponent(data.jobtype||''),
+          source: encodeURIComponent(ENTRY_SOURCE||'')
+        },
+        // 予約が完了した瞬間に、診断結果をスプシへ保存＋ヒトキワへ通知
+        onBookingComplete: function(){ onBookingSaved(); }
+      });
+    }
+    if(box) box.scrollIntoView({behavior:'smooth', block:'start'});
   }
 
-  /* ② 面談・相談送信：熱量の高いユーザーの商談化（修正案2） */
-  function submitForm(){
-    var n=val('i-name');
-    var err=document.getElementById('f-err');
-    if(!n){ err.classList.add('show'); return; }
-    err.classList.remove('show');
+  /* 予約完了時：スプシ保存＋ヒトキワ通知（1回だけ） */
+  function onBookingSaved(){
+    if(__bookingSaved) return; __bookingSaved=true;
     var p=basePayload();
-    p.stage='② 問い合わせ（診断から）'; p.name=n; p.tel=val('i-tel');
-    p.contact_pref=val('i-contact'); p.message=val('i-msg');
-    sendToGAS(p);
-    document.getElementById('t-msg').textContent =
-      n + '様（' + (data.company||'') + '）、ありがとうございます。内容を確認のうえ、担当者より順次ご連絡いたします。';
-    show('s-thanks');
+    p.stage='④ 予約完了（診断から）';
+    p.name=''; p.tel=''; p.contact_pref='TimeRex予約';
+    p.message='TimeRexで予約が完了しました。予約の確定日時・氏名は、TimeRexからの予約通知メールをご確認ください。';
+    sendToGAS(p).then(function(){ fireLeadCV(); }).catch(function(){});
   }
 
-  /* Calendly等の予約ページを結果画面に埋め込む（CONFIG.CALENDLY_URL設定時のみ） */
-  function renderCalendly(){
-    var box=document.getElementById('r-calendly'); if(!box) return;
-    if(CONFIG.CALENDLY_URL){
-      box.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--accent-deep);margin:0 0 8px;">▼ 空き枠から面談を予約できます</div>'
-        +'<iframe src="'+CONFIG.CALENDLY_URL+'" style="width:100%;height:560px;border:1px solid var(--line);border-radius:12px;" loading="lazy"></iframe>'
-        +'<div style="text-align:center;color:var(--soft);font-size:12px;margin:10px 0;">― または、下のフォームからでもOK ―</div>';
-    } else { box.innerHTML=''; }
+  /* 「電話をかける」→ 発信＋スプシ保存＋ヒトキワ通知 */
+  function onCallClick(){
+    var p=basePayload();
+    p.stage='⑤ 電話をかけた（診断から）';
+    p.name=''; p.tel=CONFIG.TEL; p.contact_pref='電話';
+    p.message='「電話をかける」ボタンが押されました（'+CONFIG.TEL+'）。';
+    sendToGAS(p).then(function(){ fireLeadCV(); }).catch(function(){});
+    return true; // tel: 発信はそのまま実行
   }
 
   /* ③ メール導線などからの単独お問い合わせ（診断を経由しない相談） */
@@ -878,11 +866,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function restart(){
     data = { exp:null, industry:null, jobtype:null, route:null, started_at:null, company:null, email:null };
-    __leadCVFired=false;
-    ['g-company','g-email','i-company','i-email','i-name','i-tel','i-msg','c-company','c-name','c-email','c-tel','c-msg'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
-    document.getElementById('i-contact').value='';
-    document.getElementById('c-contact').value='';
-    ['g-err','f-err','c-err'].forEach(function(id){ document.getElementById(id).classList.remove('show'); });
+    __leadCVFired=false; __bookingSaved=false;
+    ['c-company','c-name','c-email','c-tel','c-msg'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+    var cc=document.getElementById('c-contact'); if(cc) cc.value='';
+    var ce=document.getElementById('c-err'); if(ce) ce.classList.remove('show');
     show('s-intro');
   }
 
